@@ -87,7 +87,7 @@ export const Header: React.FC = () => {
                 : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400'
             }`}
           >
-            <UploadCloud className="w-3.5 h-3.5 text-indigo-600" />
+            <UploadCloud className={`w-3.5 h-3.5 ${activeTab === 'campaigns' ? 'text-white' : 'text-indigo-600'}`} />
             <span>Import CSV</span>
           </button>
 

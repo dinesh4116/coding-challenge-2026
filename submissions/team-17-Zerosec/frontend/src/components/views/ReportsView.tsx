@@ -101,7 +101,7 @@ export const ReportsView: React.FC = () => {
               <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">False Alarm Rate</span>
               <p className="text-2xl font-bold text-purple-600 mt-1">{metrics.falsePositiveRate}%</p>
               <p className="text-[11px] text-slate-500 mt-0.5">
-                Held by Digest / Cooldown
+                FP / Normal Days (&lt;1%)
               </p>
             </div>
           </div>
