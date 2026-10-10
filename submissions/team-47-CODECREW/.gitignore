@@ -1,0 +1,12 @@
+@"
+.venv/
+**/.venv/
+.idea/
+**/.idea/
+.dart_tool/
+**/.dart_tool/
+build/
+**/build/
+__pycache__/
+*.pyc
+"@ | Set-Content .gitignore
