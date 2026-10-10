@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Upload campaign data</h2>
+<div class="card">
+  <form method="post" enctype="multipart/form-data" class="upload">
+    <p class="mut">CSV columns: <code>date, campaign_id, campaign_name, spend, impressions, clicks, conversions</code> (optional: <code>revenue, budget, channel, vertical, landing_page_group</code>)</p>
+    <input type="file" name="file" accept=".csv">
+    <div class="row"><button class="btn" type="submit">Analyze</button>
+    <span class="mut">Leave empty to load the bundled sample dataset.</span></div>
+  </form>
+</div>
+{% endblock %}

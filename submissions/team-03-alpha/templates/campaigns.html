@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Campaigns</h2>
+<div class="card"><table>
+<thead><tr><th>Campaign</th><th>Channel</th><th>Vertical</th><th>Days</th><th>Spend</th><th>Conversions</th><th>Open alerts</th></tr></thead>
+<tbody>{% for c in campaigns %}
+<tr><td><a href="/campaigns/{{ c.id }}">{{ c.name }}</a></td><td>{{ c.channel or '-' }}</td><td>{{ c.vertical or '-' }}</td><td>{{ c.days }}</td>
+<td>{{ "{:,.0f}".format(c.spend) }}</td><td>{{ c.conversions }}</td>
+<td><span class="badge {{ 'high' if c.open_alerts else 'ok' }}">{{ c.open_alerts }}</span></td></tr>
+{% else %}<tr><td colspan="7" class="mut">No data yet. <a href="/upload">Upload a CSV</a>.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

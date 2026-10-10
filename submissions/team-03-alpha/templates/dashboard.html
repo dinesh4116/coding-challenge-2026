@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Live Dashboard</h2>
+<div class="grid4" id="kpis"></div>
+<div class="grid2">
+  <div class="card"><h3>Meaningful alerts per day (14d)</h3><div class="chartbox"><canvas id="dailyChart"></canvas></div></div>
+  <div class="card"><h3>Open alerts by severity</h3><div class="chartbox"><canvas id="sevChart"></canvas></div></div>
+</div>
+<div class="card"><div class="between"><h3>Top alerts (medium and above)</h3><a href="/alerts">View all &rarr;</a></div>
+  <div id="alertList" class="alist"></div></div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>{% endblock %}

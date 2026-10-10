@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <span class="pill">No more alert fatigue</span>
+  <h1>Alerts that learn each campaign's normal.</h1>
+  <p>Per-campaign baselines, weekday-aware seasonality, statistical significance and severity ranking - so you only see problems worth acting on.</p>
+  <div class="row"><a class="btn" href="/upload">Load data</a><a class="btn ghost" href="/dashboard">Open dashboard</a></div>
+</section>
+<div class="grid3">
+  <div class="card"><h3>Own baseline</h3><p class="mut">Median + MAD over 28 days, split by weekday.</p></div>
+  <div class="card"><h3>Significance gates</h3><p class="mut">Robust z-score and minimum % change must both pass.</p></div>
+  <div class="card"><h3>Actionable</h3><p class="mut">Severity, plain-language cause and a diagnostic next step.</p></div>
+</div>
+{% endblock %}

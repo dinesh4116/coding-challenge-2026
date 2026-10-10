@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="between"><h2>{{ c.name }} <small class="mut">{{ c.external_id }} &middot; {{ c.channel }} &middot; {{ c.vertical }}</small></h2><a href="/campaigns">&larr; All campaigns</a></div>
+<div class="grid2">
+  <div class="card"><h3>Spend</h3><div class="chartbox"><canvas id="spendChart"></canvas></div></div>
+  <div class="card"><h3>Conversions</h3><div class="chartbox"><canvas id="convChart"></canvas></div></div>
+  <div class="card"><h3>Clicks</h3><div class="chartbox"><canvas id="clickChart"></canvas></div></div>
+  <div class="card"><h3>Revenue</h3><div class="chartbox"><canvas id="revChart"></canvas></div></div>
+  <div class="card"><h3>CTR %</h3><div class="chartbox"><canvas id="ctrChart"></canvas></div></div>
+</div>
+<div class="card"><h3>Alerts for this campaign</h3><div id="alertList" class="alist"></div></div>
+{% endblock %}
+{% block scripts %}
+<script>
+const CID = {{ c.id }};
+fetch(`/api/campaigns/${CID}/series`).then(r => r.json()).then(({series, alerts}) => {
+  const labels = series.map(s => s.metric_date);
+  const flagged = {};
+  alerts.filter(a => a.severity !== 'low').forEach(a => flagged[a.metric_date] = a.severity);
+  const pts = (key, fn) => series.map(s => fn ? fn(s) : s[key]);
+  const draw = (id, label, data, color) => makeChart(id, 'line', labels, [{
+    label, data, borderColor: color, backgroundColor: color + '22', fill: true, tension: .3,
+    pointRadius: labels.map(l => flagged[l] ? 6 : 0),
+    pointBackgroundColor: labels.map(l => SEV_COLORS[flagged[l]] || color)}]);
+  draw('spendChart', 'Spend', pts('spend'), '#6366f1');
+  draw('convChart', 'Conversions', pts('conversions'), '#22c55e');
+  draw('clickChart', 'Clicks', pts('clicks'), '#38bdf8');
+  draw('revChart', 'Revenue', pts('revenue'), '#a855f7');
+  draw('ctrChart', 'CTR %', pts(null, s => s.impressions ? +(s.clicks / s.impressions * 100).toFixed(2) : 0), '#f59e0b');
+  renderAlerts(document.getElementById('alertList'), alerts.filter(a => a.severity !== 'low'), true);
+});
+</script>
+{% endblock %}
