@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ad Creative Intelligence</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+<header class="topbar">
+    <div class="brand">
+        <div class="brand-icon">AI</div>
+        <div>
+            <h1>Ad Creative Intelligence</h1>
+            <p>AI-powered advertising performance analysis</p>
+        </div>
+    </div>
+
+    <a href="{{ url_for('demo') }}" class="demo-button">
+        Explore Demo
+    </a>
+</header>
+
+<main class="container">
+    <section class="hero">
+        <span class="eyebrow">PS-02 · AD CREATIVE INTELLIGENCE</span>
+        <h2>Discover what makes an advertisement perform.</h2>
+        <p>
+            Analyze advertising images and videos, compare campaign
+            metrics, and investigate visual features associated
+            with better performance.
+        </p>
+    </section>
+
+    {% if error %}
+    <div class="alert error">{{ error }}</div>
+    {% endif %}
+
+    {% if message %}
+    <div class="alert success">{{ message }}</div>
+    {% endif %}
+
+    <section class="panel">
+        <div class="section-heading">
+            <div>
+                <h2>Upload campaign data</h2>
+                <p>Upload creatives and the CSV containing performance metrics.</p>
+            </div>
+        </div>
+
+        <form action="{{ url_for('index') }}"
+              method="POST"
+              enctype="multipart/form-data">
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="assets">Advertisement images and videos</label>
+                    <input
+                        type="file"
+                        id="assets"
+                        name="assets"
+                        accept=".jpg,.jpeg,.png,.webp,.mp4,.mov,.avi,.mkv,.webm"
+                        multiple
+                        required
+                    >
+                    <small>Select one or more supported image/video files.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="metrics_csv">Campaign metrics CSV</label>
+                    <input
+                        type="file"
+                        id="metrics_csv"
+                        name="metrics_csv"
+                        accept=".csv"
+                        required
+                    >
+                    <small>The CSV must contain a filename column.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="metric">Performance KPI</label>
+                    <select id="metric" name="metric">
+                        {% for item in metrics %}
+                        <option value="{{ item }}"
+                            {% if item == selected_metric %}selected{% endif %}>
+                            {{ item }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <small>
+                        Good/Average/Poor groups are based on this metric.
+                    </small>
+                </div>
+            </div>
+
+            <button type="submit" class="primary-button">
+                Analyze Advertisements
+            </button>
+        </form>
+
+        <div class="csv-help">
+            <strong>Example CSV format</strong>
+            <code>filename,impressions,clicks,conversions,spend,revenue</code>
+            <code>ad1.jpg,10000,350,28,1200,5600</code>
+            <code>ad2.jpg,15000,240,12,1800,3000</code>
+            <p>
+                The filenames in the CSV must match the uploaded
+                creative filenames. Sample numbers above are fictional.
+            </p>
+        </div>
+    </section>
+
+    {% if rows %}
+    <section class="dashboard-section">
+        <div class="section-heading">
+            <div>
+                <h2>Performance dashboard</h2>
+                <p>Summary of the analyzed creative collection.</p>
+            </div>
+            <span class="kpi-badge">{{ selected_metric }}</span>
+        </div>
+
+        {% if is_demo %}
+        <p class="disclaimer">
+            Demo mode: all records are simulated, not actual campaign data.
+        </p>
+        {% endif %}
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <span>Total creatives analyzed</span>
+                <strong id="totalAssets">0</strong>
+            </div>
+
+            <div class="summary-card">
+                <span>Good</span>
+                <strong id="goodCount">0</strong>
+            </div>
+
+            <div class="summary-card">
+                <span>Average</span>
+                <strong id="averageCount">0</strong>
+            </div>
+
+            <div class="summary-card">
+                <span>Poor</span>
+                <strong id="poorCount">0</strong>
+            </div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-card">
+                <h3>Performance tiers</h3>
+                <p>Distribution of Good, Average, Poor and unclassified creatives.</p>
+                <div class="chart-container">
+                    <canvas id="tierChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Image vs video</h3>
+                <p>Median selected KPI for each media type.</p>
+                <div class="chart-container">
+                    <canvas id="mediaChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card full-width">
+                <h3>Brightness vs performance</h3>
+                <p>Each point represents a creative. Association does not prove causation.</p>
+                <div class="chart-container scatter-container">
+                    <canvas id="featureChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="section-heading">
+            <div>
+                <h2>Creative gallery</h2>
+                <p>View each creative and its automatically extracted features.</p>
+            </div>
+        </div>
+
+        <div class="gallery">
+            {% for row in rows %}
+            <article class="creative-card">
+                {% if row.preview_url %}
+                    {% if row.asset_type == "Video" %}
+                    <video src="{{ row.preview_url }}"
+                           controls preload="metadata"></video>
+                    {% else %}
+                    <img src="{{ row.preview_url }}"
+                         alt="Advertisement preview">
+                    {% endif %}
+                {% else %}
+                <div class="preview-placeholder">
+                    {{ row.asset_type }} demo
+                </div>
+                {% endif %}
+
+                <div class="creative-info">
+                    <h3>{{ row.filename }}</h3>
+
+                    <span class="tier tier-{{ row.tier|lower|replace(' ', '-') }}">
+                        {{ row.tier }}
+                    </span>
+
+                    <p>Media: {{ row.asset_type }}</p>
+
+                    <p>
+                        {{ selected_metric }}:
+                        {% if row.metric_value is not none %}
+                            {{ "%.2f"|format(row.metric_value) }}
+                        {% else %}
+                            Not available
+                        {% endif %}
+                    </p>
+
+                    <p>Brightness: {{ row.brightness }}</p>
+                    <p>Contrast: {{ row.contrast }}</p>
+                    <p>Saturation: {{ row.saturation }}</p>
+                    <p>Edge density: {{ row.edge_density }}%</p>
+
+                    {% if row.asset_type == "Video" %}
+                    <p>
+                        Motion intensity:
+                        {% if row.motion is not none %}
+                            {{ row.motion }}
+                        {% else %}N/A{% endif %}
+                    </p>
+                    <p>
+                        Duration:
+                        {% if row.duration is not none %}
+                            {{ row.duration }} seconds
+                        {% else %}N/A{% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="section-heading">
+            <div>
+                <h2>Feature association analysis</h2>
+                <p>Correlation between visual features and the selected performance KPI.</p>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Visual feature</th>
+                        <th>Sample size</th>
+                        <th>Correlation (r)</th>
+                        <th>Interpretation status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in associations %}
+                    <tr>
+                        <td>{{ item.feature }}</td>
+                        <td>{{ item.sample_size }}</td>
+                        <td>
+                            {% if item.correlation is not none %}
+                                {{ "%.3f"|format(item.correlation) }}
+                            {% else %}
+                                Not available
+                            {% endif %}
+                        </td>
+                        <td>{{ item.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <p class="disclaimer">
+            Correlation values range from -1 to +1. They describe an
+            association, not proof that a visual feature causes performance.
+            Small samples provide weak evidence.
+        </p>
+    </section>
+
+    <section class="panel">
+        <div class="section-heading">
+            <div>
+                <h2>Detailed performance table</h2>
+                <p>Inspect the calculated metrics for each creative.</p>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                        <th>Type</th>
+                        <th>CTR (%)</th>
+                        <th>Conversion rate (%)</th>
+                        <th>Conversions</th>
+                        <th>CPA</th>
+                        <th>ROAS</th>
+                        <th>Tier</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td>{{ row.filename }}</td>
+                        <td>{{ row.asset_type }}</td>
+                        <td>
+                            {% if row.ctr is not none %}
+                                {{ "%.2f"|format(row.ctr) }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if row.conversion_rate is not none %}
+                                {{ "%.2f"|format(row.conversion_rate) }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if row.conversions is not none %}
+                                {{ row.conversions }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if row.cpa is not none %}
+                                {{ "%.2f"|format(row.cpa) }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if row.roas is not none %}
+                                {{ "%.2f"|format(row.roas) }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            <span class="tier tier-{{ row.tier|lower|replace(' ', '-') }}">
+                                {{ row.tier }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <button id="downloadCsv" class="secondary-button">
+            Download analysis CSV
+        </button>
+    </section>
+
+    {% else %}
+    <section class="empty-state">
+        <div class="empty-icon">📊</div>
+        <h2>Your dashboard is ready to explore</h2>
+        <p>
+            Load the sample dashboard or upload your own advertisement
+            images/videos and their corresponding campaign metrics.
+        </p>
+        <a class="primary-button" href="{{ url_for('demo') }}">
+            Load sample dashboard
+        </a>
+    </section>
+    {% endif %}
+
+    <footer>
+        <p>PS-02 · Ad Creative Intelligence</p>
+        <p>Image analysis · Video analysis · Campaign performance</p>
+    </footer>
+</main>
+
+<script>
+    window.dashboardRows = {{ rows | tojson }};
+    window.selectedMetric = {{ selected_metric | tojson }};
+</script>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
