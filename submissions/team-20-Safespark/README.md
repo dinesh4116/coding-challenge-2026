@@ -1,6 +1,3 @@
-Unzip the file to see our code
-
-
 # 🚀 BigBoost AI — Ad-to-Landing-Page Message Match Auditor & CRO Intelligence Platform
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
