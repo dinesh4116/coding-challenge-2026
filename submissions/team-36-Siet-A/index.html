@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Search term triage</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Login (shown until a session is stored) -->
+  <div id="login" class="login" aria-label="Sign in">
+    <div class="login-panel card">
+      <div class="login-top">
+        <div>
+          <p class="login-brand">Search term triage</p>
+          <h1 class="login-title">Sign in</h1>
+          <p class="sub">Demo access for the Search Term Triage Engine. Your session stays in this browser only.</p>
+        </div>
+        <button type="button" class="theme-toggle" aria-label="Switch between light and dark theme">Dark mode</button>
+      </div>
+      <form id="loginForm" class="login-form" novalidate>
+        <label for="user">Username
+          <input type="text" id="user" name="username" autocomplete="username" required autofocus>
+        </label>
+        <label for="pass">Password
+          <input type="password" id="pass" name="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit" class="pri" id="loginBtn">Sign in</button>
+        <p class="login-hint">Demo credentials: username <code>analyst</code> / password <code>triage2026</code></p>
+        <div class="err" id="loginErr" role="alert" hidden></div>
+      </form>
+    </div>
+  </div>
+
+<div class="wrap" id="app" hidden>
+
+  <header class="top">
+    <div>
+      <h1>Search term triage</h1>
+      <p class="sub">Upload a Google Ads search-terms report. Every term gets promote, block or ignore with a plain reason. Terms with too little data go to you for review instead of being guessed.</p>
+    </div>
+    <div class="top-actions">
+      <button id="logout" type="button">Log out</button>
+      <button type="button" class="theme-toggle" aria-label="Switch between light and dark theme">Dark mode</button>
+    </div>
+  </header>
+
+  <!-- 1. Load data -->
+  <section class="card" id="load" aria-label="Load data">
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose a CSV or ZIP file">
+      <b>Drop your CSV or ZIP here, or click to choose</b>
+      <span>Use search_terms_report.csv, or drop the PS-01 / Srishti .zip and the app will unpack the CSV for you. Needs search term, clicks, cost and conversions. Your file stays in this browser.</span>
+    </div>
+    <input type="file" id="file" accept=".csv,.tsv,.txt,.zip,text/csv,application/zip" hidden>
+    <div class="row" style="margin-top:12px">
+      <button id="sample" type="button">Try with sample data</button>
+      <span class="status" id="status" role="status" aria-live="polite"></span>
+    </div>
+    <div class="err" id="err" role="alert" hidden></div>
+  </section>
+
+  <!-- 2. Settings -->
+  <details class="card" id="settings">
+    <summary>Decision thresholds</summary>
+    <div class="set">
+      <label>Minimum clicks to make a call<input type="number" id="minClicks" value="15" min="1"></label>
+      <label>Minimum conversions to promote<input type="number" id="minConv" value="3" min="1"></label>
+      <label>Block when chance of zero conversions is below<input type="number" id="alpha" value="0.05" step="0.01" min="0.001" max="0.5"></label>
+      <label>Block only after spending this many times the account cost per conversion<input type="number" id="costMult" value="1" step="0.25" min="0"></label>
+    </div>
+    <div class="row" style="margin-top:12px"><button id="resetSet" type="button">Reset to defaults</button><span class="status">Results update as you change a value.</span></div>
+  </details>
+
+  <!-- 3. Results -->
+  <div id="results" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="mix" id="mix" role="img" aria-label="Share of promote, block and ignore decisions"></div>
+
+    <div class="sugg" id="suggBar" hidden>
+      <span id="suggText"></span>
+      <button id="applySugg" type="button" class="pri">Apply suggestions</button>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Views">
+      <button role="tab" id="tab-terms" aria-selected="true" data-tab="terms">Terms</button>
+      <button role="tab" id="tab-groups" aria-selected="false" data-tab="groups">Groups</button>
+      <button role="tab" id="tab-patterns" aria-selected="false" data-tab="patterns">Block patterns</button>
+    </div>
+
+    <div class="card tools row" id="tools">
+      <input type="search" id="fQ" placeholder="Search terms" aria-label="Search terms">
+      <select id="fDec" aria-label="Decision"><option value="">All decisions</option><option value="promote">Promote</option><option value="block">Block</option><option value="ignore">Ignore</option></select>
+      <select id="fConf" aria-label="Confidence"><option value="">All confidence</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>
+      <select id="fSort" aria-label="Sort"><option value="clicks">Most clicks</option><option value="cost">Most cost</option><option value="conv">Most conversions</option><option value="cvr">Highest conv. rate</option></select>
+      <label class="row chk"><input type="checkbox" id="fRev"> Needs review only</label>
+    </div>
+
+    <section id="panel-terms" role="tabpanel" aria-labelledby="tab-terms">
+      <div class="tw"><table>
+        <thead><tr><th>Search term</th><th>Clicks</th><th>Cost</th><th>Conv.</th><th>Conv. rate</th><th>Decision</th><th>Confidence</th><th>Reason</th><th>Your call</th></tr></thead>
+        <tbody id="tb"></tbody>
+      </table></div>
+      <div class="pager"><span id="pinfo"></span><button id="prev" type="button">Previous</button><button id="next" type="button">Next</button></div>
+    </section>
+
+    <section id="panel-groups" role="tabpanel" aria-labelledby="tab-groups" hidden>
+      <p class="note">Variants of the same search intent (word order, plurals) are pooled into one row, so thin terms get judged on their combined evidence. Your call on a group applies to every variant.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Group</th><th>Clicks</th><th>Cost</th><th>Conv.</th><th>Conv. rate</th><th>Decision</th><th>Confidence</th><th>Reason</th><th>Your call</th></tr></thead>
+        <tbody id="gtb"></tbody>
+      </table></div>
+      <div class="pager"><span id="gpinfo"></span><button id="gprev" type="button">Previous</button><button id="gnext" type="button">Next</button></div>
+    </section>
+
+    <section id="panel-patterns" role="tabpanel" aria-labelledby="tab-patterns" hidden>
+      <p class="note">Words that lose money across many terms. Adding one as a phrase negative blocks every query containing it, so check the "also in promoted terms" column first.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Word</th><th>Campaign</th><th>Terms</th><th>Clicks</th><th>Cost</th><th>Conv.</th><th>Suggested negative</th><th>Also in promoted terms</th></tr></thead>
+        <tbody id="ptb"></tbody>
+      </table></div>
+    </section>
+
+    <div class="card dl row">
+      <b>Export</b><span class="sp"></span>
+      <button class="pri" id="dAll" type="button">Full results CSV</button>
+      <button id="dPro" type="button">Keywords to add</button>
+      <button id="dNeg" type="button">Negatives to add</button>
+      <button id="dPat" type="button">Phrase negatives</button>
+      <button id="resetOv" type="button">Clear my corrections</button>
+    </div>
+  </div>
+
+  <details class="card why">
+    <summary>Why "conversions &gt; 0" is not enough</summary>
+    <p>A term with 2 clicks and 1 conversion shows a 50% conversion rate, but two clicks cannot tell luck from a real winner. This tool measures how sure it can be.</p>
+    <p><b>Promote</b> needs enough clicks and conversions, and the 95% lower bound (Wilson) of the term's conversion rate must beat the account average.</p>
+    <p><b>Block</b> needs a low chance of seeing this few conversions at the account's normal rate, plus meaningful spend.</p>
+    <p><b>Needs review</b> covers everything with too little data, and promising terms without enough proof. Groups and your own corrections can turn these into suggestions.</p>
+  </details>
+
+</div>
+<script src="script.js"></script>
+</body>
+</html>

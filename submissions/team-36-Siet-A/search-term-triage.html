@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Search term triage</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <style>
+/* ---------- Theme tokens ---------- */
+:root{
+  --bg:#eef2f6; --card:#ffffff; --ink:#14202b; --mute:#5b6b7a; --line:#d8e0e8;
+  --acc:#0b5ed7; --acc-ink:#ffffff;
+  --pro:#17794a; --probg:#e0f3e8;
+  --blk:#b3372b; --blkbg:#fbe5e2;
+  --ign:#4a5866; --ignbg:#e6ebf0;
+  --rev:#9a6200; --revbg:#fff0d1;
+  --sug:#5a3fb0; --sugbg:#ece6fb;
+}
+:root[data-theme="dark"]{
+  --bg:#0f161d; --card:#18222c; --ink:#e8eef4; --mute:#92a3b3; --line:#2a3846;
+  --acc:#5b9bff; --acc-ink:#06101c;
+  --pro:#58d68d; --probg:#14352a;
+  --blk:#ff8d80; --blkbg:#3d1c19;
+  --ign:#a9b7c4; --ignbg:#243240;
+  --rev:#f3be5b; --revbg:#3b2e12;
+  --sug:#b9a6ff; --sugbg:#2b2447;
+}
+
+/* ---------- Base ---------- */
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 60px}
+h1{font:700 clamp(26px,4vw,36px)/1.15 Georgia,"Times New Roman",serif;margin:0 0 6px;letter-spacing:-.01em}
+.top{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+.top-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex-shrink:0}
+.sub{color:var(--mute);max-width:68ch;margin:0}
+
+/* ---------- Login ---------- */
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;
+  background:
+    radial-gradient(ellipse 80% 50% at 10% 0%, color-mix(in srgb,var(--acc) 14%,transparent), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 90% 100%, color-mix(in srgb,var(--acc) 10%,transparent), transparent 50%),
+    var(--bg)}
+.login-panel{width:100%;max-width:420px;margin:0;padding:22px 22px 20px;
+  box-shadow:0 12px 40px color-mix(in srgb,var(--ink) 8%,transparent)}
+.login-top{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+.login-brand{font:700 13px/1.2 Georgia,"Times New Roman",serif;color:var(--acc);letter-spacing:.04em;text-transform:uppercase;margin:0 0 8px}
+.login-title{font:700 clamp(24px,4vw,30px)/1.15 Georgia,"Times New Roman",serif;margin:0 0 8px;letter-spacing:-.01em}
+.login-form{display:flex;flex-direction:column;gap:14px}
+.login-form label{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--mute);font-weight:600}
+.login-form input{border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:9px 11px;font:inherit;color:var(--ink)}
+.login-form input:focus{border-color:var(--acc);outline:2px solid color-mix(in srgb,var(--acc) 35%,transparent);outline-offset:1px}
+.login-form .pri{align-self:stretch;padding:10px 14px;margin-top:2px}
+.login-hint{margin:0;font-size:12.5px;color:var(--mute);line-height:1.45}
+.login-hint code{font-size:12px;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--ink)}
+.login .err{margin-top:0}
+.note{color:var(--mute);font-size:13.5px;max-width:80ch;margin:0 0 10px}
+.status{color:var(--mute);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:7px;padding:7px 13px}
+button:hover:not(:disabled){border-color:var(--acc)}
+button.pri{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:600}
+button:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.sp{flex:1}
+.chk{gap:6px}
+summary{cursor:pointer;font-weight:600}
+
+/* ---------- Drop zone ---------- */
+.drop{border:2px dashed var(--line);border-radius:10px;padding:28px 16px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+.drop.on,.drop:hover{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 6%,transparent)}
+.drop b{display:block;font-size:17px;margin-bottom:4px}
+.drop span{color:var(--mute);font-size:13px}
+.err{color:var(--blk);background:var(--blkbg);padding:10px 12px;border-radius:8px;margin-top:12px}
+
+/* ---------- Settings ---------- */
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:12px}
+.set label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mute)}
+.set input{border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:6px 8px}
+
+/* ---------- Stats ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;margin-bottom:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-left-width:4px;border-radius:10px;padding:12px 14px}
+.stat b{display:block;font-size:24px;line-height:1.2;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--mute)}
+.s-pro{border-left-color:var(--pro)}.s-blk{border-left-color:var(--blk)}.s-ign{border-left-color:var(--ign)}
+.s-rev{border-left-color:var(--rev)}.s-sug{border-left-color:var(--sug)}.s-acc{border-left-color:var(--acc)}
+.mix{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--ignbg);margin-bottom:14px}
+.mix i{display:block;height:100%}
+.mix .m-pro{background:var(--pro)}.mix .m-blk{background:var(--blk)}.mix .m-ign{background:var(--ign);opacity:.45}
+
+/* ---------- Suggestions bar ---------- */
+.sugg{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:var(--sugbg);color:var(--ink);border:1px solid var(--sug);border-radius:10px;padding:10px 14px;margin-bottom:14px}
+
+/* ---------- Tabs ---------- */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px;overflow-x:auto}
+.tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:9px 14px;color:var(--mute);white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--acc);font-weight:600}
+
+/* ---------- Tools ---------- */
+.tools input[type=search],.tools select{border:1px solid var(--line);background:var(--card);border-radius:7px;padding:7px 10px}
+.tools input[type=search]{min-width:200px;flex:1}
+
+/* ---------- Tables ---------- */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:960px;font-size:14px}
+th,td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12.5px;color:var(--mute);font-weight:600;background:var(--bg);position:sticky;top:0}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.q{font-weight:600;max-width:270px;word-break:break-word}
+td.q small{display:block;font-weight:400;color:var(--mute);font-size:12px}
+td.why{color:var(--mute);max-width:390px;font-size:13px}
+td.why em{display:block;color:var(--sug);font-style:normal;margin-top:3px}
+tr.sub td{background:var(--bg);font-size:13px;color:var(--mute)}
+.chip{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:1px 7px;margin:2px 4px 2px 0}
+.expand{padding:1px 8px;font-size:12px;margin-top:4px}
+.bd{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.bd.promote{background:var(--probg);color:var(--pro)}
+.bd.block{background:var(--blkbg);color:var(--blk)}
+.bd.ignore{background:var(--ignbg);color:var(--ign)}
+.bd.review{background:var(--revbg);color:var(--rev);margin-left:4px}
+.bd.sug{background:var(--sugbg);color:var(--sug);margin-left:4px}
+.conf-high{font-weight:700}.conf-low{color:var(--mute)}
+td select{border:1px solid var(--line);background:var(--card);border-radius:6px;padding:4px 6px}
+.empty{text-align:center;color:var(--mute);padding:26px}
+.pager{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:10px;font-size:13px;color:var(--mute)}
+.dl{margin-top:14px}
+.why p{margin:8px 0;max-width:75ch}
+
+@media (max-width:640px){
+  .wrap{padding:14px 10px 50px}
+  .top{flex-direction:column}
+  .login-top{flex-direction:column}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+  </style>
+</head>
+<body>
+
+  <!-- Login (shown until a session is stored) -->
+  <div id="login" class="login" aria-label="Sign in">
+    <div class="login-panel card">
+      <div class="login-top">
+        <div>
+          <p class="login-brand">Search term triage</p>
+          <h1 class="login-title">Sign in</h1>
+          <p class="sub">Demo access for the Search Term Triage Engine. Your session stays in this browser only.</p>
+        </div>
+        <button type="button" class="theme-toggle" aria-label="Switch between light and dark theme">Dark mode</button>
+      </div>
+      <form id="loginForm" class="login-form" novalidate>
+        <label for="user">Username
+          <input type="text" id="user" name="username" autocomplete="username" required autofocus>
+        </label>
+        <label for="pass">Password
+          <input type="password" id="pass" name="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit" class="pri" id="loginBtn">Sign in</button>
+        <p class="login-hint">Demo credentials: username <code>analyst</code> / password <code>triage2026</code></p>
+        <div class="err" id="loginErr" role="alert" hidden></div>
+      </form>
+    </div>
+  </div>
+
+<div class="wrap" id="app" hidden>
+
+  <header class="top">
+    <div>
+      <h1>Search term triage</h1>
+      <p class="sub">Upload a Google Ads search-terms report. Every term gets promote, block or ignore with a plain reason. Terms with too little data go to you for review instead of being guessed.</p>
+    </div>
+    <div class="top-actions">
+      <button id="logout" type="button">Log out</button>
+      <button type="button" class="theme-toggle" aria-label="Switch between light and dark theme">Dark mode</button>
+    </div>
+  </header>
+
+  <!-- 1. Load data -->
+  <section class="card" id="load" aria-label="Load data">
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose a CSV or ZIP file">
+      <b>Drop your CSV or ZIP here, or click to choose</b>
+      <span>Use search_terms_report.csv, or drop the PS-01 / Srishti .zip and the app will unpack the CSV for you. Needs search term, clicks, cost and conversions. Your file stays in this browser.</span>
+    </div>
+    <input type="file" id="file" accept=".csv,.tsv,.txt,.zip,text/csv,application/zip" hidden>
+    <div class="row" style="margin-top:12px">
+      <button id="sample" type="button">Try with sample data</button>
+      <span class="status" id="status" role="status" aria-live="polite"></span>
+    </div>
+    <div class="err" id="err" role="alert" hidden></div>
+  </section>
+
+  <!-- 2. Settings -->
+  <details class="card" id="settings">
+    <summary>Decision thresholds</summary>
+    <div class="set">
+      <label>Minimum clicks to make a call<input type="number" id="minClicks" value="15" min="1"></label>
+      <label>Minimum conversions to promote<input type="number" id="minConv" value="3" min="1"></label>
+      <label>Block when chance of zero conversions is below<input type="number" id="alpha" value="0.05" step="0.01" min="0.001" max="0.5"></label>
+      <label>Block only after spending this many times the account cost per conversion<input type="number" id="costMult" value="1" step="0.25" min="0"></label>
+    </div>
+    <div class="row" style="margin-top:12px"><button id="resetSet" type="button">Reset to defaults</button><span class="status">Results update as you change a value.</span></div>
+  </details>
+
+  <!-- 3. Results -->
+  <div id="results" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="mix" id="mix" role="img" aria-label="Share of promote, block and ignore decisions"></div>
+
+    <div class="sugg" id="suggBar" hidden>
+      <span id="suggText"></span>
+      <button id="applySugg" type="button" class="pri">Apply suggestions</button>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Views">
+      <button role="tab" id="tab-terms" aria-selected="true" data-tab="terms">Terms</button>
+      <button role="tab" id="tab-groups" aria-selected="false" data-tab="groups">Groups</button>
+      <button role="tab" id="tab-patterns" aria-selected="false" data-tab="patterns">Block patterns</button>
+    </div>
+
+    <div class="card tools row" id="tools">
+      <input type="search" id="fQ" placeholder="Search terms" aria-label="Search terms">
+      <select id="fDec" aria-label="Decision"><option value="">All decisions</option><option value="promote">Promote</option><option value="block">Block</option><option value="ignore">Ignore</option></select>
+      <select id="fConf" aria-label="Confidence"><option value="">All confidence</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>
+      <select id="fSort" aria-label="Sort"><option value="clicks">Most clicks</option><option value="cost">Most cost</option><option value="conv">Most conversions</option><option value="cvr">Highest conv. rate</option></select>
+      <label class="row chk"><input type="checkbox" id="fRev"> Needs review only</label>
+    </div>
+
+    <section id="panel-terms" role="tabpanel" aria-labelledby="tab-terms">
+      <div class="tw"><table>
+        <thead><tr><th>Search term</th><th>Clicks</th><th>Cost</th><th>Conv.</th><th>Conv. rate</th><th>Decision</th><th>Confidence</th><th>Reason</th><th>Your call</th></tr></thead>
+        <tbody id="tb"></tbody>
+      </table></div>
+      <div class="pager"><span id="pinfo"></span><button id="prev" type="button">Previous</button><button id="next" type="button">Next</button></div>
+    </section>
+
+    <section id="panel-groups" role="tabpanel" aria-labelledby="tab-groups" hidden>
+      <p class="note">Variants of the same search intent (word order, plurals) are pooled into one row, so thin terms get judged on their combined evidence. Your call on a group applies to every variant.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Group</th><th>Clicks</th><th>Cost</th><th>Conv.</th><th>Conv. rate</th><th>Decision</th><th>Confidence</th><th>Reason</th><th>Your call</th></tr></thead>
+        <tbody id="gtb"></tbody>
+      </table></div>
+      <div class="pager"><span id="gpinfo"></span><button id="gprev" type="button">Previous</button><button id="gnext" type="button">Next</button></div>
+    </section>
+
+    <section id="panel-patterns" role="tabpanel" aria-labelledby="tab-patterns" hidden>
+      <p class="note">Words that lose money across many terms. Adding one as a phrase negative blocks every query containing it, so check the "also in promoted terms" column first.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Word</th><th>Campaign</th><th>Terms</th><th>Clicks</th><th>Cost</th><th>Conv.</th><th>Suggested negative</th><th>Also in promoted terms</th></tr></thead>
+        <tbody id="ptb"></tbody>
+      </table></div>
+    </section>
+
+    <div class="card dl row">
+      <b>Export</b><span class="sp"></span>
+      <button class="pri" id="dAll" type="button">Full results CSV</button>
+      <button id="dPro" type="button">Keywords to add</button>
+      <button id="dNeg" type="button">Negatives to add</button>
+      <button id="dPat" type="button">Phrase negatives</button>
+      <button id="resetOv" type="button">Clear my corrections</button>
+    </div>
+  </div>
+
+  <details class="card why">
+    <summary>Why "conversions &gt; 0" is not enough</summary>
+    <p>A term with 2 clicks and 1 conversion shows a 50% conversion rate, but two clicks cannot tell luck from a real winner. This tool measures how sure it can be.</p>
+    <p><b>Promote</b> needs enough clicks and conversions, and the 95% lower bound (Wilson) of the term's conversion rate must beat the account average.</p>
+    <p><b>Block</b> needs a low chance of seeing this few conversions at the account's normal rate, plus meaningful spend.</p>
+    <p><b>Needs review</b> covers everything with too little data, and promising terms without enough proof. Groups and your own corrections can turn these into suggestions.</p>
+  </details>
+
+</div>
+<script>
+'use strict';
+/* =====================================================================
+   Search Term Triage Engine  -  script.js
+   Part 1: logic (no page access, easy to test)
+   Part 2: UI (everything below the "UI" marker)
+   ===================================================================== */
+
+/* ===== 1. LOGIC ===== */
+
+// Editable thresholds (also shown in the UI). Z is fixed for a 95% Wilson interval.
+const DEFAULTS = { minClicks: 15, minConv: 3, alpha: 0.05, costMult: 1, Z: 1.96 };
+const Z = DEFAULTS.Z;
+
+// Column names we recognise (lowercase, letters and digits only)
+const ALIAS = {
+  q:     ['searchterm', 'query', 'querytext', 'searchquery', 'term', 'keyword', 'searchtermtext'],
+  match: ['matchtype', 'match', 'searchtermmatchtype'],
+  camp:  ['campaign', 'campaignname'],
+  ag:    ['adgroup', 'adgroupname'],
+  imp:   ['impressions', 'impr', 'impressionscount'],
+  clicks:['clicks', 'click'],
+  cost:  ['cost', 'spend', 'costusd'],
+  conv:  ['conversions', 'conv', 'allconv', 'conversioncount'],
+  val:   ['conversionvalue', 'convvalue', 'conversionsvalue', 'revenue', 'allconvvalue']
+};
+const REQUIRED = { q: 'search term', clicks: 'clicks', cost: 'cost', conv: 'conversions' };
+
+// Grammar words ignored when grouping or learning (not intent words like "buy" or "free")
+const STOP = new Set(['the','a','an','for','of','in','on','to','and','with','is','are','at','by','from','my','your','i','a']);
+
+/* ---- CSV reading ---- */
+
+// Splits text into rows of cells. Handles quotes, escaped quotes and line breaks inside cells.
+function parseCSV(text, delim) {
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const out = []; let row = [], cell = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQ) {
+      if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else inQ = false; }
+      else cell += ch;
+    } else if (ch === '"') inQ = true;
+    else if (ch === delim) { row.push(cell); cell = ''; }
+    else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      row.push(cell); cell = ''; out.push(row); row = [];
+    } else cell += ch;
+  }
+  if (cell !== '' || row.length) { row.push(cell); out.push(row); }
+  return out.filter(r => r.some(c => c.trim() !== ''));
+}
+
+const norm = h => String(h).toLowerCase().replace(/[^a-z0-9]/g, '');
+
+function mapColumns(fields) {
+  const nf = fields.map(norm), map = {};
+  for (const k in ALIAS) { const i = nf.findIndex(h => ALIAS[k].includes(h)); if (i >= 0) map[k] = i; }
+  return map;
+}
+
+// Turns raw file text into {fields, data}. Skips title lines that Google Ads puts above the header.
+function tableFromText(text) {
+  const head = text.split(/\r?\n/).slice(0, 8).join('\n');
+  const count = d => (head.match(new RegExp(d === '\t' ? '\t' : '\\' + d, 'g')) || []).length;
+  const delim = [',', ';', '\t'].sort((a, b) => count(b) - count(a))[0];
+  const grid = parseCSV(text, delim);
+  // A real header must at least name the search-term column; missing required
+  // metrics are reported later by buildRows with the columns that were found.
+  for (let i = 0; i < Math.min(grid.length, 15); i++) {
+    const m = mapColumns(grid[i]);
+    if (m.q !== undefined) {
+      const fields = grid[i];
+      const data = grid.slice(i + 1).map(r => Object.fromEntries(fields.map((f, j) => [f, r[j] === undefined ? '' : r[j]])));
+      return { fields, data };
+    }
+  }
+  // ZIP magic bytes (PK) mean the user dropped an archive as if it were a CSV
+  if (text.charCodeAt(0) === 0x50 && text.charCodeAt(1) === 0x4B) {
+    throw new Error('That file is a ZIP archive, not a CSV. Drop the .zip again (this app can open it), or unzip first and choose search_terms_report.csv.');
+  }
+  const first = grid[0] || [];
+  throw new Error('Could not find the header row. Expected columns for ' + Object.values(REQUIRED).join(', ') + '. First row found: ' + first.slice(0, 6).join(', '));
+}
+
+/* ---- ZIP reading (so dropping the challenge .zip works) ---- */
+
+function isZipBuffer(buf) {
+  const b = new Uint8Array(buf);
+  return b.length >= 4 && b[0] === 0x50 && b[1] === 0x4B && (b[2] === 3 || b[2] === 5 || b[2] === 7);
+}
+
+// Inflate a raw DEFLATE payload (ZIP method 8). Uses the browser API or Node zlib.
+async function inflateRaw(bytes) {
+  const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  if (typeof DecompressionStream !== 'undefined') {
+    const stream = new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
+  }
+  if (typeof require !== 'undefined') {
+    return new Uint8Array(require('zlib').inflateRawSync(Buffer.from(u8)));
+  }
+  throw new Error('Cannot unzip this file here. Unzip it yourself and drop search_terms_report.csv.');
+}
+
+// Walk local-file headers and return { name, method, data } for each entry.
+function listZipEntries(buf) {
+  const u8 = new Uint8Array(buf);
+  const view = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  const entries = [];
+  let o = 0;
+  while (o + 30 <= u8.length) {
+    if (view.getUint32(o, true) !== 0x04034b50) break;
+    const flags = view.getUint16(o + 6, true);
+    const method = view.getUint16(o + 8, true);
+    const comp = view.getUint32(o + 18, true);
+    const nlen = view.getUint16(o + 26, true);
+    const elen = view.getUint16(o + 28, true);
+    const name = new TextDecoder().decode(u8.subarray(o + 30, o + 30 + nlen));
+    const dataStart = o + 30 + nlen + elen;
+    if (flags & 0x8) {
+      throw new Error('This ZIP uses an unusual layout. Unzip it and drop search_terms_report.csv instead.');
+    }
+    entries.push({ name, method, data: u8.subarray(dataStart, dataStart + comp) });
+    o = dataStart + comp;
+  }
+  return entries;
+}
+
+async function unzipEntryBytes(entry) {
+  if (entry.method === 0) return entry.data;
+  if (entry.method === 8) return inflateRaw(entry.data);
+  throw new Error('Unsupported ZIP compression. Unzip the archive and drop the .csv file.');
+}
+
+// Find a CSV inside a ZIP (and inside nested ZIPs like the Srishti pack).
+async function extractCsvFromZip(buf, depth) {
+  if (depth == null) depth = 0;
+  if (depth > 3) {
+    throw new Error('ZIP is nested too deeply. Unzip it and drop search_terms_report.csv.');
+  }
+  const files = listZipEntries(buf).filter(e => e.name && !e.name.endsWith('/'));
+  const csvs = files.filter(e => /\.csv$/i.test(e.name));
+  if (csvs.length) {
+    const pick = csvs.find(e => /search.?term/i.test(e.name)) || csvs[0];
+    const bytes = await unzipEntryBytes(pick);
+    return { name: pick.name.split(/[/\\]/).pop(), bytes };
+  }
+  const zips = files.filter(e => /\.zip$/i.test(e.name));
+  if (zips.length) {
+    const pick = zips.find(e => /PS-01|search.?term/i.test(e.name)) || zips[0];
+    const nested = await unzipEntryBytes(pick);
+    return extractCsvFromZip(nested.buffer.slice(nested.byteOffset, nested.byteOffset + nested.byteLength), depth + 1);
+  }
+  throw new Error('No CSV found inside that ZIP. Use search_terms_report.csv, or drop PS-01_search_term_triage_dataset.zip.');
+}
+
+const num = v => { const x = parseFloat(String(v == null ? '' : v).replace(/[^0-9.\-]/g, '')); return isFinite(x) ? x : 0; };
+
+// Builds clean row objects from the parsed table
+function buildRows({ fields, data }) {
+  const m = mapColumns(fields);
+  const miss = Object.keys(REQUIRED).filter(k => m[k] === undefined);
+  if (miss.length) throw new Error('Missing column(s): ' + miss.map(k => REQUIRED[k]).join(', ') + '. Columns found: ' + fields.join(', '));
+  const get = (r, k) => m[k] === undefined ? '' : r[fields[m[k]]];
+  const rows = [];
+  data.forEach(r => {
+    const q = String(get(r, 'q')).trim();
+    if (!q || /^(total|--)/i.test(q)) return; // drop empty and "Total: ..." lines
+    rows.push({ i: rows.length, raw: r, q, match: get(r, 'match'), camp: get(r, 'camp'), ag: get(r, 'ag'),
+      imp: num(get(r, 'imp')), clicks: num(get(r, 'clicks')), cost: num(get(r, 'cost')), conv: num(get(r, 'conv')), val: num(get(r, 'val')),
+      override: null, auto: false, sugg: null });
+  });
+  if (!rows.length) throw new Error('The file has a header but no search-term rows.');
+  return rows;
+}
+
+/* ---- Statistics ---- */
+
+// 95% confidence interval for a conversion rate; stays honest when clicks are few
+function wilson(c, n) {
+  if (!n) return [0, 1];
+  const p = c / n, d = 1 + Z * Z / n, mid = p + Z * Z / (2 * n);
+  const span = Z * Math.sqrt((p * (1 - p) + Z * Z / (4 * n)) / n);
+  return [(mid - span) / d, (mid + span) / d];
+}
+const pct = x => (x * 100).toFixed(1) + '%';
+
+// Decides promote / block / ignore for one set of numbers (a term, or a pooled group)
+function judge(n, c, cost, acct, C) {
+  const [lo, hi] = wilson(c, n), cvr = n ? c / n : 0, p = acct.p, z0 = Math.pow(1 - p, n);
+  const spendOK = cost >= C.costMult * acct.cpa;
+  let decision = 'ignore', conf = 'medium', review = false, reason;
+  if (n < C.minClicks) {
+    review = true; conf = 'low';
+    reason = c > 0 ? `${c} conv from only ${n} clicks, likely noise. Needs a human look.` : `Only ${n} clicks, too little data to judge.`;
+  } else if (c >= C.minConv && lo > p) {
+    decision = 'promote'; conf = (lo > 2 * p && c >= 5) ? 'high' : 'medium';
+    reason = `${n} clicks, ${c} conv, rate ${pct(cvr)}. Lower bound ${pct(lo)} beats account ${pct(p)}.`;
+  } else if (c === 0 && z0 < C.alpha && spendOK) {
+    decision = 'block'; conf = z0 < C.alpha / 5 ? 'high' : 'medium';
+    reason = `${n} clicks, ${cost.toFixed(0)} spent, 0 conv. Only ${(z0 * 100).toFixed(1)}% chance at account rate ${pct(p)}.`;
+  } else if (c > 0 && hi < p && spendOK) {
+    decision = 'block'; conf = 'medium';
+    reason = `${n} clicks, ${c} conv. Upper bound ${pct(hi)} is below account ${pct(p)}.`;
+  } else if (c > 0 && cvr > p) {
+    review = true; conf = 'low';
+    reason = `${c} conv from ${n} clicks looks promising, but lower bound ${pct(lo)} does not beat account ${pct(p)}.`;
+  } else if (c === 0) {
+    reason = `${n} clicks, 0 conv, but not enough evidence to block (expected ${(n * p).toFixed(1)} conv).`;
+  } else {
+    reason = `${n} clicks, ${c} conv, rate ${pct(cvr)}, close to account ${pct(p)}.`;
+  }
+  return { decision, conf, review, reason, cvr };
+}
+
+/* ---- Grouping similar queries ---- */
+
+function stem(w) {
+  if (/(ches|shes|sses|xes|zes)$/.test(w)) return w.slice(0, -2);
+  if (w.length > 3 && w.endsWith('s') && !w.endsWith('ss')) w = w.slice(0, -1);
+  if (w.length > 5 && w.endsWith('ing')) return w.slice(0, -3);
+  if (w.length > 4 && w.endsWith('ed')) return w.slice(0, -2);
+  return w;
+}
+const words = q => q.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(w => w && !STOP.has(w));
+// Same words in any order, singular or plural, end up with the same key
+function groupKey(q) {
+  const k = [...new Set(words(q).map(stem))].sort().join(' ');
+  return k || q.toLowerCase();
+}
+
+/* ---- Main computation ---- */
+
+function computeAll(rows, C) {
+  let N = 0, V = 0, CS = 0;
+  for (const r of rows) { N += r.clicks; V += r.conv; CS += r.cost; }
+  const acct = { N, V, CS, p: N ? V / N : 0, cpa: V ? CS / V : Infinity };
+  const gm = new Map();
+  for (const r of rows) {
+    Object.assign(r, judge(r.clicks, r.conv, r.cost, acct, C));
+    r.key = groupKey(r.q);
+    let g = gm.get(r.key);
+    if (!g) { g = { key: r.key, members: [], clicks: 0, conv: 0, cost: 0 }; gm.set(r.key, g); }
+    g.members.push(r); g.clicks += r.clicks; g.conv += r.conv; g.cost += r.cost; r.group = g;
+  }
+  const groups = [...gm.values()];
+  for (const g of groups) {
+    const j = judge(g.clicks, g.conv, g.cost, acct, C);
+    Object.assign(g, j, { reason: `${g.members.length} variants pooled: ${j.reason}` });
+    g.rep = g.members.reduce((a, b) => (b.clicks > a.clicks ? b : a));
+  }
+  return { acct, groups, patterns: findPatterns(rows, acct, C) };
+}
+
+// Words that lose money across several terms: candidates for a phrase-match negative
+function findPatterns(rows, acct, C) {
+  const m = new Map();
+  for (const r of rows) {
+    for (const w of new Set(words(r.q))) {
+      if (w.length < 3 || /^\d+$/.test(w)) continue;
+      const k = (r.camp || '') + '|' + w;
+      let s = m.get(k);
+      if (!s) { s = { word: w, camp: r.camp || '', terms: 0, clicks: 0, conv: 0, cost: 0, ags: new Set(), promoted: 0 }; m.set(k, s); }
+      s.terms++; s.clicks += r.clicks; s.conv += r.conv; s.cost += r.cost; s.ags.add(r.ag || '');
+      if (r.decision === 'promote') s.promoted++;
+    }
+  }
+  const out = [];
+  for (const s of m.values()) {
+    const [, hi] = wilson(s.conv, s.clicks);
+    if (s.terms >= 3 && s.clicks >= C.minClicks * 2 && hi < acct.p * 0.5 && s.cost >= C.costMult * acct.cpa) {
+      s.level = s.ags.size > 1 ? 'Campaign' : 'Ad group';
+      s.adGroup = s.ags.size > 1 ? '' : [...s.ags][0];
+      out.push(s);
+    }
+  }
+  return out.sort((a, b) => b.cost - a.cost);
+}
+
+/* ---- Suggestions for terms that were sent to review ---- */
+
+const fin = r => r.override || r.decision;
+
+// Word scores learned from the reviewer's own corrections (not from auto-applied suggestions)
+function learnWords(rows) {
+  const L = {};
+  for (const r of rows) {
+    if (!r.override || r.auto) continue;
+    for (const w of new Set(words(r.q))) (L[w] = L[w] || { promote: 0, block: 0, ignore: 0 })[r.override]++;
+  }
+  return L;
+}
+
+function suggest(rows) {
+  const L = learnWords(rows);
+  for (const r of rows) {
+    r.sugg = null;
+    if (!(r.review && !r.override)) continue;
+    const g = r.group;
+    if (g.members.length > 1 && !g.review) {
+      r.sugg = { d: g.decision, src: `its group of ${g.members.length} variants has enough combined data` };
+      continue;
+    }
+    const v = { promote: 0, block: 0, ignore: 0 }, used = [];
+    for (const w of new Set(words(r.q))) if (L[w]) { used.push(w); for (const k in v) v[k] += L[w][k]; }
+    const tot = v.promote + v.block + v.ignore, top = Object.keys(v).sort((a, b) => v[b] - v[a])[0];
+    if (tot >= 3 && v[top] / tot >= 0.75) r.sugg = { d: top, src: `learned from your corrections on: ${used.join(', ')}` };
+  }
+}
+
+/* ---- Export helpers ---- */
+
+// Prefix formula-like cells so spreadsheets do not execute them (= + - @ tab CR).
+function safeCell(v) {
+  v = v == null ? '' : String(v);
+  if (/^[=+\-@\t\r]/.test(v) && !/^-?\d+(\.\d+)?$/.test(v)) v = "'" + v;
+  return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}
+
+function toCSV(objs) {
+  if (!objs.length) return '\ufeff';
+  const cols = []; objs.forEach(o => Object.keys(o).forEach(k => { if (!cols.includes(k)) cols.push(k); }));
+  return '\ufeff' + [cols.map(safeCell).join(','), ...objs.map(o => cols.map(c => safeCell(o[c])).join(','))].join('\r\n');
+}
+
+function keywordRows(rows) {
+  return rows.filter(r => fin(r) === 'promote').map(r => ({ Campaign: r.camp, 'Ad group': r.ag, Keyword: r.q, 'Match type': 'Exact' }));
+}
+
+// Exact negatives. Campaign level when the same term is blocked in more than one ad group.
+function negativeRows(rows) {
+  const m = new Map();
+  rows.filter(r => fin(r) === 'block').forEach(r => {
+    const k = r.camp + '|' + r.q.toLowerCase();
+    if (!m.has(k)) m.set(k, { r, ags: new Set() });
+    m.get(k).ags.add(r.ag);
+  });
+  return [...m.values()].map(({ r, ags }) => {
+    const camp = ags.size > 1;
+    return { Campaign: r.camp, 'Ad group': camp ? '' : r.ag, 'Negative keyword': r.q, 'Match type': 'Exact', Level: camp ? 'Campaign' : 'Ad group' };
+  });
+}
+
+function patternRows(patterns) {
+  return patterns.map(s => ({ Campaign: s.camp, 'Ad group': s.adGroup, 'Negative keyword': s.word, 'Match type': 'Phrase', Level: s.level,
+    Evidence: `${s.terms} terms, ${s.clicks} clicks, ${s.cost.toFixed(0)} spent, ${s.conv} conv` }));
+}
+
+function resultRows(rows) {
+  return rows.map(r => ({ ...r.raw, decision: r.decision, confidence: r.conf, needs_review: r.review, reason: r.reason,
+    suggestion: r.sugg ? r.sugg.d : '', final_decision: fin(r), group_variants: r.group.members.length }));
+}
+
+/* ---- Sample data ---- */
+
+function makeSample(count = 5000) {
+  let s = 7; const R = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const pick = a => a[Math.floor(R() * a.length)];
+  const A = ['buy', 'cheap', 'best', 'discount', 'online', 'free', 'how to', 'diy', 'used', 'near me', '2026', 'review'];
+  const P = ['running shoes', 'white sneakers', 'trail shoes', 'shoe cleaner', 'school shoes', 'leather boots', 'sandals'];
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    const a = pick(A), b = pick(A), p = pick(P);
+    let q = R() < 0.5 ? `${a} ${p}` : `${a} ${p} ${b}`;
+    const v = R(); if (v < 0.15) q = q.split(' ').reverse().join(' '); else if (v < 0.25) q += 's';
+    const junk = /free|how to|diy|review/.test(q), buyer = /buy|discount|best|online/.test(q);
+    const n = Math.max(1, Math.floor(Math.exp(R() * R() * 6))), rate = junk ? 0.004 : buyer ? 0.09 : 0.035;
+    let c = 0; for (let k = 0; k < n; k++) if (R() < rate) c++;
+    out.push({ 'Search term': q, 'Match type': pick(['Broad', 'Phrase', 'Exact']), Campaign: pick(['Shoes - Search', 'Care - Search']),
+      'Ad group': pick(['Core', 'Brand', 'Generic']), Impressions: n * Math.floor(8 + R() * 30), Clicks: n,
+      Cost: (n * (0.4 + R() * 1.6)).toFixed(2), Conversions: c, 'Conversion value': (c * (20 + R() * 60)).toFixed(2) });
+  }
+  return out;
+}
+
+/* ===== UI ===== */
+if (typeof document !== 'undefined') (function ui() {
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const PS = 100; // rows per page
+const S = { rows: [], groups: [], patterns: [], acct: { p: 0, cpa: Infinity }, tab: 'terms', page: 0, gpage: 0, open: new Set() };
+
+/* ---- helpers ---- */
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } },
+  remove(k) { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } }
+};
+const SESSION_KEY = 'stte_session';
+const DEMO_USER = 'analyst';
+const DEMO_PASS = 'triage2026';
+const cfg = () => ({
+  minClicks: +$('#minClicks').value || DEFAULTS.minClicks, minConv: +$('#minConv').value || DEFAULTS.minConv,
+  alpha: +$('#alpha').value || DEFAULTS.alpha, costMult: $('#costMult').value === '' ? DEFAULTS.costMult : +$('#costMult').value
+});
+const showErr = m => { const e = $('#err'); e.textContent = m; e.hidden = !m; };
+const setStatus = m => { $('#status').textContent = m; };
+function download(name, text) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' }));
+  a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+let timer; const debounce = (fn, ms) => () => { clearTimeout(timer); timer = setTimeout(fn, ms); };
+
+/* ---- theme ---- */
+function setTheme(t) {
+  document.documentElement.dataset.theme = t; store.set('theme', t);
+  const label = t === 'dark' ? 'Light mode' : 'Dark mode';
+  document.querySelectorAll('.theme-toggle').forEach(b => { b.textContent = label; });
+}
+setTheme(store.get('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+document.querySelectorAll('.theme-toggle').forEach(b => {
+  b.onclick = () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+});
+
+/* ---- login / session (demo, client-side only) ---- */
+function showLoginErr(m) {
+  const e = $('#loginErr'); e.textContent = m; e.hidden = !m;
+}
+function setLoggedIn(on) {
+  $('#login').hidden = !!on;
+  $('#app').hidden = !on;
+  if (on) {
+    const q = $('#user'); if (q) q.value = '';
+    const p = $('#pass'); if (p) p.value = '';
+    showLoginErr('');
+  } else {
+    const u = $('#user'); if (u) { u.focus(); }
+  }
+}
+function isLoggedIn() { return store.get(SESSION_KEY) === '1'; }
+$('#loginForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const user = ($('#user').value || '').trim();
+  const pass = $('#pass').value || '';
+  if (user === DEMO_USER && pass === DEMO_PASS) {
+    store.set(SESSION_KEY, '1');
+    setLoggedIn(true);
+  } else {
+    showLoginErr('Incorrect username or password. Use the demo credentials shown below the form.');
+    $('#pass').value = '';
+    $('#pass').focus();
+  }
+});
+$('#logout').onclick = () => {
+  store.remove(SESSION_KEY);
+  setLoggedIn(false);
+};
+setLoggedIn(isLoggedIn());
+
+/* ---- saved thresholds ---- */
+try {
+  const saved = JSON.parse(store.get('thresholds') || 'null');
+  if (saved) ['minClicks', 'minConv', 'alpha', 'costMult'].forEach(k => {
+    if (saved[k] != null) $('#' + k).value = saved[k];
+  });
+} catch (e) { /* ignore */ }
+
+/* ---- loading data ---- */
+function decode(buf) {
+  const b = new Uint8Array(buf);
+  if (b[0] === 0xFF && b[1] === 0xFE) return new TextDecoder('utf-16le').decode(buf);
+  if (b[0] === 0xFE && b[1] === 0xFF) return new TextDecoder('utf-16be').decode(buf);
+  return new TextDecoder('utf-8').decode(buf);
+}
+function loadRows(rows, label) {
+  S.rows = rows; S.open = new Set();
+  setStatus(`${label}: ${rows.length.toLocaleString()} terms loaded`);
+  run();
+}
+async function bufferToRows(buf, label) {
+  // Accept .zip challenge packs: pull out the CSV (even from a nested ZIP).
+  if (isZipBuffer(buf)) {
+    setStatus('Unzipping archive...');
+    const { name, bytes } = await extractCsvFromZip(buf);
+    label = label + ' → ' + name;
+    buf = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+  }
+  return { rows: buildRows(tableFromText(decode(buf))), label };
+}
+
+function readFile(f) {
+  showErr(''); setStatus('Reading file...');
+  f.arrayBuffer().then(buf => bufferToRows(buf, f.name)).then(({ rows, label }) => {
+    loadRows(rows, label);
+  }).catch(e => {
+    setStatus('');
+    showErr(e && e.message ? e.message : 'Could not read that file. Use a .csv or the PS-01 .zip.');
+  });
+}
+const drop = $('#drop');
+drop.onclick = () => $('#file').click();
+drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#file').click(); } };
+$('#file').onchange = e => e.target.files[0] && readFile(e.target.files[0]);
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('on'); };
+drop.ondragleave = () => drop.classList.remove('on');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('on'); e.dataTransfer.files[0] && readFile(e.dataTransfer.files[0]); };
+$('#sample').onclick = () => { showErr(''); loadRows(buildRows(tableFromText(toCSV(makeSample()))), 'Sample data'); };
+
+/* ---- computing ---- */
+function run() {
+  if (!S.rows.length) return;
+  const C = cfg(); store.set('thresholds', JSON.stringify(C));
+  Object.assign(S, computeAll(S.rows, C));
+  $('#results').hidden = false;
+  refresh(true);
+}
+function refresh(reset) {
+  suggest(S.rows);
+  if (reset) { S.page = 0; S.gpage = 0; }
+  render();
+}
+
+/* ---- rendering ---- */
+const gOv = g => { const f = g.members[0].override; return f && g.members.every(m => m.override === f) ? f : ''; };
+const gFin = g => gOv(g) || g.decision;
+
+function renderStats() {
+  const t = { promote: 0, block: 0, ignore: 0 }; let rev = 0, sg = 0;
+  S.rows.forEach(r => { t[fin(r)]++; if (r.review && !r.override) rev++; if (r.sugg) sg++; });
+  const card = (c, v, l) => `<div class="stat ${c}"><b>${v}</b><span>${l}</span></div>`;
+  $('#stats').innerHTML = card('s-acc', S.rows.length.toLocaleString(), 'terms') + card('s-pro', t.promote.toLocaleString(), 'promote') +
+    card('s-blk', t.block.toLocaleString(), 'block') + card('s-ign', t.ignore.toLocaleString(), 'ignore') +
+    card('s-rev', rev.toLocaleString(), 'need review') + card('s-acc', pct(S.acct.p), 'account conv. rate') +
+    card('s-acc', isFinite(S.acct.cpa) ? S.acct.cpa.toFixed(2) : 'n/a', 'cost per conversion');
+  const w = x => (x / S.rows.length * 100).toFixed(2) + '%';
+  $('#mix').innerHTML = `<i class="m-pro" style="width:${w(t.promote)}"></i><i class="m-blk" style="width:${w(t.block)}"></i><i class="m-ign" style="width:${w(t.ignore)}"></i>`;
+  $('#mix').title = `${t.promote} promote, ${t.block} block, ${t.ignore} ignore`;
+  $('#suggBar').hidden = !sg;
+  $('#suggText').textContent = `${sg.toLocaleString()} review term${sg === 1 ? ' has' : 's have'} a suggested decision from group evidence or your earlier corrections.`;
+}
+
+const badges = (d, review, sugg, override) => `<span class="bd ${d}">${d}</span>` +
+  (review && !override ? '<span class="bd review">review</span>' : '') +
+  (sugg ? `<span class="bd sug" title="${esc(sugg.src)}">suggest: ${sugg.d}</span>` : '');
+const select = (attr, val) => `<select ${attr} aria-label="Override decision"><option value="">Keep</option>` +
+  ['promote', 'block', 'ignore'].map(o => `<option value="${o}"${val === o ? ' selected' : ''}>${o[0].toUpperCase() + o.slice(1)}</option>`).join('') + '</select>';
+
+function filters() {
+  return { dec: $('#fDec').value, conf: $('#fConf').value, rev: $('#fRev').checked, q: $('#fQ').value.toLowerCase().trim(), sort: $('#fSort').value };
+}
+function pager(prefix, page, total) {
+  const pages = Math.max(1, Math.ceil(total / PS)), p = Math.min(page, pages - 1);
+  $('#' + prefix + 'pinfo').textContent = `${total.toLocaleString()} ${prefix ? 'groups' : 'terms'}, page ${p + 1} of ${pages}`;
+  $('#' + prefix + 'prev').disabled = p === 0; $('#' + prefix + 'next').disabled = p >= pages - 1;
+  return p;
+}
+
+function renderTerms() {
+  const f = filters();
+  const v = S.rows.filter(r => (!f.dec || fin(r) === f.dec) && (!f.conf || r.conf === f.conf) && (!f.rev || (r.review && !r.override)) && (!f.q || r.q.toLowerCase().includes(f.q)));
+  v.sort((a, b) => b[f.sort] - a[f.sort]);
+  S.page = pager('', S.page, v.length);
+  const rows = v.slice(S.page * PS, S.page * PS + PS);
+  $('#tb').innerHTML = rows.length ? rows.map(r => `<tr>
+    <td class="q">${esc(r.q)}<small>${esc([r.camp, r.ag, r.match].filter(Boolean).join(' / '))}</small></td>
+    <td class="n">${r.clicks.toLocaleString()}</td><td class="n">${r.cost.toFixed(2)}</td><td class="n">${r.conv}</td><td class="n">${pct(r.cvr)}</td>
+    <td>${badges(fin(r), r.review, r.sugg, r.override)}</td><td class="conf-${r.conf}">${r.conf}</td>
+    <td class="why">${esc(r.reason)}${r.sugg ? `<em>Suggestion: ${r.sugg.d}, because ${esc(r.sugg.src)}.</em>` : ''}</td>
+    <td>${select(`data-i="${r.i}"`, r.override)}</td></tr>`).join('')
+    : '<tr><td colspan="9" class="empty">No terms match these filters. Clear a filter to see more.</td></tr>';
+}
+
+function renderGroups() {
+  const f = filters();
+  const v = S.groups.filter(g => g.members.length > 1 && (!f.dec || gFin(g) === f.dec) && (!f.conf || g.conf === f.conf) &&
+    (!f.rev || (g.review && !gOv(g))) && (!f.q || g.members.some(m => m.q.toLowerCase().includes(f.q))));
+  v.sort((a, b) => b[f.sort] - a[f.sort]);
+  S.gpage = pager('g', S.gpage, v.length);
+  const gs = v.slice(S.gpage * PS, S.gpage * PS + PS);
+  $('#gtb').innerHTML = gs.length ? gs.map(g => {
+    const open = S.open.has(g.key);
+    const sub = open ? `<tr class="sub"><td colspan="9">${g.members.slice().sort((a, b) => b.clicks - a.clicks).map(m =>
+      `<span class="chip">${esc(m.q)}: ${m.clicks} clicks, ${m.conv} conv</span>`).join('')}</td></tr>` : '';
+    return `<tr><td class="q">${esc(g.rep.q)}<small>${g.members.length} variants</small>
+      <button type="button" class="expand" data-key="${esc(g.key)}" aria-expanded="${open}">${open ? 'Hide variants' : 'Show variants'}</button></td>
+      <td class="n">${g.clicks.toLocaleString()}</td><td class="n">${g.cost.toFixed(2)}</td><td class="n">${g.conv}</td><td class="n">${pct(g.cvr)}</td>
+      <td>${badges(gFin(g), g.review, null, gOv(g))}</td><td class="conf-${g.conf}">${g.conf}</td>
+      <td class="why">${esc(g.reason)}</td><td>${select(`data-key="${esc(g.key)}"`, gOv(g))}</td></tr>${sub}`;
+  }).join('') : '<tr><td colspan="9" class="empty">No groups match these filters. Groups need at least two variants of the same intent.</td></tr>';
+}
+
+function renderPatterns() {
+  $('#ptb').innerHTML = S.patterns.length ? S.patterns.slice(0, 200).map(s => `<tr>
+    <td class="q">${esc(s.word)}</td><td>${esc(s.camp)}</td><td class="n">${s.terms}</td><td class="n">${s.clicks.toLocaleString()}</td>
+    <td class="n">${s.cost.toFixed(2)}</td><td class="n">${s.conv}</td>
+    <td>Phrase match, ${s.level.toLowerCase()} level${s.adGroup ? ' (' + esc(s.adGroup) + ')' : ''}</td>
+    <td class="n">${s.promoted ? `<span class="bd review">${s.promoted} promoted</span>` : 'none'}</td></tr>`).join('')
+    : '<tr><td colspan="8" class="empty">No word shows enough evidence of wasted spend yet. Try lowering the minimum clicks.</td></tr>';
+}
+
+function render() {
+  if (!S.rows.length) return;
+  renderStats();
+  $('#tools').hidden = S.tab === 'patterns';
+  ['terms', 'groups', 'patterns'].forEach(t => {
+    $('#panel-' + t).hidden = S.tab !== t;
+    $('#tab-' + t).setAttribute('aria-selected', S.tab === t);
+  });
+  if (S.tab === 'terms') renderTerms(); else if (S.tab === 'groups') renderGroups(); else renderPatterns();
+}
+
+/* ---- events ---- */
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; render(); });
+['fDec', 'fConf', 'fSort', 'fRev'].forEach(id => $('#' + id).onchange = () => { S.page = 0; S.gpage = 0; render(); });
+$('#fQ').oninput = debounce(() => { S.page = 0; S.gpage = 0; render(); }, 200);
+$('#prev').onclick = () => { S.page--; render(); };  $('#next').onclick = () => { S.page++; render(); };
+$('#gprev').onclick = () => { S.gpage--; render(); }; $('#gnext').onclick = () => { S.gpage++; render(); };
+
+// Your call on a single term
+$('#tb').addEventListener('change', e => {
+  const i = e.target.dataset.i; if (i == null) return;
+  const r = S.rows[i]; r.override = e.target.value || null; r.auto = false; refresh();
+});
+// Your call on a whole group, and show/hide variants
+$('#gtb').addEventListener('change', e => {
+  const key = e.target.dataset.key; if (key == null) return;
+  const g = S.groups.find(x => x.key === key);
+  g.members.forEach(m => { m.override = e.target.value || null; m.auto = false; }); refresh();
+});
+$('#gtb').addEventListener('click', e => {
+  const b = e.target.closest('.expand'); if (!b) return;
+  const k = b.dataset.key; S.open.has(k) ? S.open.delete(k) : S.open.add(k); render();
+});
+
+$('#applySugg').onclick = () => { S.rows.forEach(r => { if (r.sugg) { r.override = r.sugg.d; r.auto = true; } }); refresh(); };
+$('#resetOv').onclick = () => { S.rows.forEach(r => { r.override = null; r.auto = false; }); refresh(); };
+
+['minClicks', 'minConv', 'alpha', 'costMult'].forEach(id => $('#' + id).oninput = debounce(run, 300));
+$('#resetSet').onclick = () => {
+  ['minClicks', 'minConv', 'alpha', 'costMult'].forEach(k => { $('#' + k).value = DEFAULTS[k]; });
+  run();
+};
+
+// Exports (decisions you corrected are used)
+$('#dAll').onclick = () => download('triage_output.csv', toCSV(resultRows(S.rows)));
+$('#dPro').onclick = () => download('keywords_to_add.csv', toCSV(keywordRows(S.rows)));
+$('#dNeg').onclick = () => download('negatives_to_add.csv', toCSV(negativeRows(S.rows)));
+$('#dPat').onclick = () => download('phrase_negatives.csv', toCSV(patternRows(S.patterns)));
+
+})();
+
+/* Export pure logic for Node tests (no page access). */
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    DEFAULTS, Z, ALIAS, REQUIRED, STOP,
+    parseCSV, tableFromText, buildRows, num, wilson, judge, stem, words, groupKey,
+    computeAll, findPatterns, learnWords, suggest, fin,
+    toCSV, safeCell, keywordRows, negativeRows, patternRows, resultRows, makeSample,
+    isZipBuffer, inflateRaw, listZipEntries, extractCsvFromZip
+  };
+}
+
+</script>
+</body>
+</html>
