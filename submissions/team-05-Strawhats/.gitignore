@@ -1,0 +1,25 @@
+# Python backend
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Node.js / React
+node_modules/
+dist/
+dist-ssr/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Editor and OS files
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
