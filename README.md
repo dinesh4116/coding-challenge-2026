@@ -1,97 +1,90 @@
-# SearchPilot AI — Intelligent Google Ads Search Term Triage Engine
+# SearchSense AI — Search Term Triage Engine (PS-01)
 
-**SearchPilot AI** is a modern, enterprise-grade SaaS web platform built to help digital marketing teams triage thousands of Google Ads search terms into three explainable actions:
-
-- 🟢 **PROMOTE**: Recommend adding a relevant, high-potential search term as a deliberate target keyword (Exact/Phrase match).
-- 🔴 **BLOCK**: Recommend excluding an irrelevant or clearly unwanted search term using a negative keyword.
-- 🟡 **IGNORE**: Keep monitoring the search term because the evidence is insufficient for a reliable decision.
+SearchSense AI is an explainable search term intelligence and triage platform built for Google Ads advertisers, agency teams, and marketing analysts. It automatically standardizes search term report CSVs, evaluates search intent and performance metrics against configurable business rules, and triages search queries into four distinct, evidence-backed decision categories: **PROMOTE**, **BLOCK**, **IGNORE**, and **HUMAN REVIEW**.
 
 ---
 
-## 🌟 Key Highlights & Philosophy
+## 🌟 Key Features
 
-1. **Statistical Uncertainty First**:
-   - Computes the **Wilson Score 95% confidence lower bound** on conversion rate (CVR).
-   - **Mitigates the Single-Conversion Trap**: Never automatically promotes a search term just because it recorded 1 click and 1 conversion (100% naive CVR). Low click volume has high volatility and is routed to human review.
-   - Low conversion count alone **never** justifies blocking a relevant term.
-
-2. **Explainable AI**:
-   - Every recommendation is accompanied by a confidence percentage (80-100% High, 60-79% Medium, <60% Low), human-readable rationale, factor breakdown, and missing data alerts.
-
-3. **Human-in-the-Loop Review Center**:
-   - Dedicated review workbench for analysts to approve, override, add contextual notes, and inspect a full session audit trail.
-
-4. **Negative Keyword Studio with Collision Checking**:
-   - Auto-formats negative keywords as Phrase (`"query"`) or Exact (`[query]`).
-   - Automatically cross-references proposed negative phrases against converting queries to prevent accidental exclusion of high-value traffic.
-   - 1-click export formatted for Google Ads Editor.
-
-5. **25,000-Row Vectorized Performance**:
-   - High-throughput Pandas pipeline capable of triaging 25,000 rows in under 2 seconds.
-
-6. **Robust CSV Import**:
-   - Reads real Google Ads exports as-is: title/date rows above the header, UTF-8/UTF-16/Windows-1252, comma/tab/semicolon delimiters, `$1,234.50` / `12%` / `--` / `< 10` values, and `Total:` rows. Missing columns are filled with safe defaults and flagged with a warning.
+1. **Synthetic 25,000-Row Data Generator:** Generates a 25,000-row synthetic Google Ads search-term dataset instantly with a single click for testing.
+2. **Flexible CSV Schema Auto-Mapping:** Automatically maps column aliases (e.g. `Search term`, `Spend`, `Orders`, `Query`) to standard canonical fields without breaking on unknown CSV structures.
+3. **Explainable Rule-Based Decision Engine:** Evaluates text intent (buying signals vs non-commercial keywords) alongside performance evidence (Clicks, Spend, Conversions, ROAS) to assign transparent decisions.
+4. **Human Review Workspace:** Routes low-confidence, ambiguous, or high-spend non-converting search terms to a dedicated human review queue with reviewer override & rationale logging.
+5. **Cybersecurity-Style Premium UI:** Built with a modern dark theme, status badges, interactive Plotly distribution charts, and dynamic filtering.
+6. **One-Click Export Centre:** Separate CSV downloads for Negative Keyword Blocklists (`BLOCK`), Keyword Expansion Targets (`PROMOTE`), Low Traffic terms (`IGNORE`), and Human Review Queues.
 
 ---
 
-## 🏗️ Architecture & Technology Stack
+## 🛠️ Project Structure
 
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Recharts, Lucide Icons.
-- **Backend**: Python 3.12, FastAPI, Pandas, Scikit-learn, Pydantic, SQLite (`searchpilot.db`).
-- **Statistical Engine**: Wilson score lower bounds, Bayesian sample size shrinkage, TF-IDF n-gram token overlap, intent lexicons.
+- `app.py`: Main Streamlit application frontend with multi-page sidebar navigation and design system.
+- `decision_engine.py`: Core rule engine evaluating relevance, evidence sufficiency, and decision explanations.
+- `csv_processor.py`: Resilient CSV parser, auto-column mapper, and standardizer.
+- `data_generator.py`: Reproducible synthetic 25,000-row search-term generator.
+- `tests/test_decision_engine.py`: Unit test suite verifying decision logic edge cases.
+- `tests/test_csv_processing.py`: Unit test suite verifying schema mapping and error handling.
+- `data/sample_search_terms_25000.csv`: Pre-generated 25,000-row synthetic demonstration dataset.
+- `requirements.txt`: Python package dependencies.
+- `.gitignore`: Git configuration excluding temporary caches and venv files.
 
 ---
 
-## 🚀 Quick Start (single address)
+## 💻 Local Windows Setup & Quickstart
 
-SearchPilot AI runs on **one address**: the backend serves both the API and the web app.
+### Prerequisites
+- Python 3.10+ installed on Windows.
+- Git installed.
 
-**Easiest:** double-click `setup_and_run.bat`. It installs everything, builds the web app, starts the server and opens **http://localhost:8000**.
+### Step-by-Step Instructions
 
-**Manual:**
+1. **Open PowerShell or Command Prompt in the repository folder:**
+   ```powershell
+   cd d:\SearchSense-Triage
+   ```
 
-```bash
-cd backend
-python -m venv venv
-.\venv\Scripts\pip install -r requirements.txt
+2. **(Optional) Create and activate a Python virtual environment:**
+   ```powershell
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1
+   ```
 
-cd ..\frontend
-npm.cmd install
-npm.cmd run build
+3. **Install required dependencies:**
+   ```powershell
+   pip install -r requirements.txt
+   ```
 
-cd ..\backend
-.\venv\Scripts\python -m uvicorn main:app --host 127.0.0.1 --port 8000
+4. **Run automated unit tests to verify system integrity:**
+   ```powershell
+   python -m pytest tests/
+   ```
+
+5. **Launch the SearchSense AI application:**
+   ```powershell
+   python -m streamlit run app.py
+   ```
+   *The application will launch automatically in your web browser at `http://localhost:8501`.*
+
+---
+
+## 📥 How to Upload the Official Hackathon CSV
+
+1. Open the application sidebar and navigate to **`2. Data Studio`**.
+2. Drag and drop or upload your official hackathon CSV file under **Upload Search Term CSV**.
+3. Inspect the auto-detected column mappings. SearchSense AI automatically maps standard Google Ads export headers (`Search term`, `Match type`, `Campaign`, `Cost`, `Clicks`, `Conversions`, `Conversion value`).
+4. Navigate to **`3. Triage Analysis`**, configure your business context (e.g., product description and target keywords), and click **🚀 ANALYSE SEARCH TERMS NOW**.
+5. Inspect results in **Interactive Results Explorer**, override uncertain cases in **`4. Human Review Queue`**, and export ready-to-use lists in **`6. Export Centre`**.
+
+---
+
+## 🐙 How to Push to GitHub
+
+To publish this project to GitHub, execute the following commands in your terminal:
+
+```powershell
+git init
+git add .
+git commit -m "Initial commit - SearchSense AI Triage Engine (PS-01)"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/SearchSense-Triage.git
+git push -u origin main
 ```
-
-Open **http://localhost:8000** (API docs at `http://localhost:8000/docs`).
-
-Next time, just run `run_backend.bat`. (`run_frontend.bat` is a developer-only hot-reload mode on port 3000.)
-
----
-
-## 💻 Run in VS Code
-
-1. **File > Open Folder...** and choose the `searchpilot-ai` folder. Accept the "install recommended extensions" prompt.
-2. Press **Ctrl+Shift+B** (runs "Setup everything and run"): installs the backend, builds the web app, starts the server.
-3. Open **http://localhost:8000**.
-
-Next time: **Terminal > Run Task > 3. Run SearchPilot AI**, or press **F5** to run with the debugger.
-
----
-
-## 🧪 Automated Testing & Benchmarks
-
-Run the test suite:
-
-```bash
-cd backend
-.\venv\Scripts\python test_suite.py
-```
-
-Tests verify:
-- Single-conversion trap avoidance ($N=1, Conv=1 \to$ IGNORE / Review).
-- Irrelevant intent detection ($Cost>0, Negative Intent \to$ BLOCK).
-- High performer targeting ($Conv\ge 2, Strong ROAS \to$ PROMOTE).
-- Benchmark: 25,000 rows triaged in sub-2 seconds.
-
----

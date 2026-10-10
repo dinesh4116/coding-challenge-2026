@@ -1,0 +1,23 @@
+# Python / IDE
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+ENV/
+env/
+
+# Data & Output cache
+*.csv
+!data/sample_search_terms_25000.csv
+.streamlit/
+
+# OS / Environment
+.DS_Store
+Thumbs.db
+*.log
+.env
+*.xls
+*.xlsx
+*.xlsm
