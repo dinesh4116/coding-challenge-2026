@@ -1,0 +1,4 @@
+dataset,raw_flagged_records,alerts,human_review_records,episodes,notifications_sent,new_episode_notifications,escalation_notifications,suppressed_repeats,notification_reduction_pct
+Synthetic (eval split),80,45,35,52,53,52,1,27,33.75
+Synthetic (full),150,76,74,101,104,101,3,46,30.666666666666664
+"PS-04 (official, no labels)",364,230,134,200,219,200,19,145,39.83516483516483

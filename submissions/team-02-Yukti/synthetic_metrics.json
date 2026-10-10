@@ -1,0 +1,51 @@
+{
+  "evaluation_unit": "(campaign_id, metric, date), metric in {spend, conversions, ctr}, EVAL split only",
+  "record_level": {
+    "n_evaluated": 4050,
+    "n_positive": 81,
+    "n_negative": 3969,
+    "tp": 21,
+    "fp": 23,
+    "fn": 60,
+    "tn": 3946,
+    "precision": 0.4772727272727273,
+    "recall": 0.25925925925925924,
+    "f1": 0.33599999999999997,
+    "n_unmapped_metric_flags": 36
+  },
+  "incident_level": {
+    "n_eval_incidents": 8,
+    "detection_rate_eval": 1.0,
+    "mean_delay_days_eval": 3.75,
+    "median_delay_days_eval": 0.0
+  },
+  "false_alerts_on_labelled_benign_shifts_eval": {
+    "benign_shift_records": 140,
+    "benign_shift_flagged_records": 0,
+    "benign_shift_alert_records": 0,
+    "benign_shift_flag_rate": 0.0,
+    "benign_events_with_any_flag": []
+  },
+  "alert_fatigue_eval_split": {
+    "raw_flagged_records": 80,
+    "alerts": 45,
+    "human_review_records": 35,
+    "episodes": 52,
+    "notifications_sent": 53,
+    "new_episode_notifications": 52,
+    "escalation_notifications": 1,
+    "suppressed_repeats": 27,
+    "notification_reduction_pct": 33.75
+  },
+  "alert_fatigue_full_dataset": {
+    "raw_flagged_records": 150,
+    "alerts": 76,
+    "human_review_records": 74,
+    "episodes": 101,
+    "notifications_sent": 104,
+    "new_episode_notifications": 101,
+    "escalation_notifications": 3,
+    "suppressed_repeats": 46,
+    "notification_reduction_pct": 30.666666666666664
+  }
+}

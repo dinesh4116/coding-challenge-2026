@@ -1,0 +1,13 @@
+incident_id,campaign_id,incident_type,mapped_metric,severity,period,start_date,end_date,detected,first_flag_date,delay_days,best_route
+INC001,C03,spend_spike,spend,high,dev,2026-02-10,2026-02-11,True,2026-02-10,0,Alert
+INC002,C08,tracking_failure,conversions,high,dev,2026-02-25,2026-03-02,True,2026-02-25,0,Alert
+INC003,C12,ctr_collapse,ctr,medium,dev,2026-03-07,2026-03-10,True,2026-03-07,0,Alert
+INC004,C14,gradual_degradation,conversions,medium,dev,2026-02-20,2026-03-17,True,2026-02-23,3,Human Review
+INC005,C01,spend_spike,spend,high,eval,2026-05-01,2026-05-02,True,2026-05-01,0,Alert
+INC006,C13,spend_spike,spend,medium,eval,2026-05-31,2026-05-31,True,2026-05-31,0,Alert
+INC007,C05,tracking_failure,conversions,high,eval,2026-04-11,2026-04-15,True,2026-04-11,0,Alert
+INC008,C11,tracking_failure,conversions,medium,eval,2026-05-21,2026-05-27,True,2026-05-21,0,Alert
+INC009,C07,ctr_collapse,ctr,high,eval,2026-04-21,2026-04-25,True,2026-04-21,0,Alert
+INC010,C15,ctr_collapse,ctr,low,eval,2026-06-10,2026-06-13,True,2026-06-11,1,Human Review
+INC011,C09,gradual_degradation,conversions,medium,eval,2026-05-06,2026-05-31,True,2026-05-27,21,Human Review
+INC012,C02,gradual_degradation,conversions,low,eval,2026-05-16,2026-06-15,True,2026-05-24,8,Alert

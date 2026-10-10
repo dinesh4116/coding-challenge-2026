@@ -1,0 +1,3 @@
+event_id,campaign_id,event_type,start_date,affected_metric,magnitude,period
+BEN001,C06,seasonal_budget_increase,2026-03-12,spend,1.4,dev
+BEN002,C10,seasonal_budget_increase,2026-05-11,spend,1.35,eval

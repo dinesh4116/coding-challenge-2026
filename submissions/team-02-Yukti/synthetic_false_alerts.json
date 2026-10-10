@@ -1,0 +1,7 @@
+{
+  "benign_shift_records": 140,
+  "benign_shift_flagged_records": 0,
+  "benign_shift_alert_records": 0,
+  "benign_shift_flag_rate": 0.0,
+  "benign_events_with_any_flag": []
+}

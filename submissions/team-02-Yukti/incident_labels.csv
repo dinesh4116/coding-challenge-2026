@@ -1,0 +1,13 @@
+incident_id,campaign_id,incident_type,start_date,end_date,affected_metric,severity,magnitude,period
+INC001,C03,spend_spike,2026-02-10,2026-02-11,spend,high,2.8,dev
+INC002,C08,tracking_failure,2026-02-25,2026-03-02,conversions,high,0.05,dev
+INC003,C12,ctr_collapse,2026-03-07,2026-03-10,ctr,medium,0.45,dev
+INC004,C14,gradual_degradation,2026-02-20,2026-03-17,conversion_rate,medium,0.55,dev
+INC005,C01,spend_spike,2026-05-01,2026-05-02,spend,high,3.0,eval
+INC006,C13,spend_spike,2026-05-31,2026-05-31,spend,medium,1.6,eval
+INC007,C05,tracking_failure,2026-04-11,2026-04-15,conversions,high,0.0,eval
+INC008,C11,tracking_failure,2026-05-21,2026-05-27,conversions,medium,0.4,eval
+INC009,C07,ctr_collapse,2026-04-21,2026-04-25,ctr,high,0.4,eval
+INC010,C15,ctr_collapse,2026-06-10,2026-06-13,ctr,low,0.7,eval
+INC011,C09,gradual_degradation,2026-05-06,2026-05-31,conversion_rate,medium,0.5,eval
+INC012,C02,gradual_degradation,2026-05-16,2026-06-15,conversion_rate,low,0.6,eval

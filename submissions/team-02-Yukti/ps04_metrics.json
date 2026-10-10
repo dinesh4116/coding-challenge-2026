@@ -1,0 +1,16 @@
+{
+  "note": "PS-04 has no ground-truth labels. Precision, recall, F1 and incident-level detection rate are NOT computed and MUST NOT be inferred from this file. Only alert-fatigue volume is measured.",
+  "fatigue": {
+    "raw_flagged_records": 364,
+    "alerts": 230,
+    "human_review_records": 134,
+    "episodes": 200,
+    "notifications_sent": 219,
+    "new_episode_notifications": 200,
+    "escalation_notifications": 19,
+    "suppressed_repeats": 145,
+    "notification_reduction_pct": 39.83516483516483
+  },
+  "n_campaigns": 20,
+  "n_records": 25200
+}
