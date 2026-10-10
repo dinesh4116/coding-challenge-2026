@@ -1,0 +1,72 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+.venv/
+env/
+.env
+ENV/
+env.bak/
+venv.bak/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs & temporary files
+*.log
+scratch/
+tmp/
+.pytest_cache/
+
+# Streamlit runtime cache
+.streamlit/
+!.streamlit/config.toml
+
+# Local Generated Data / Cache (SQLite databases generated at runtime)
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Keep competition & benchmark datasets tracked
+!PS-04_campaign_anomaly_alerting/
+!PS-04_campaign_anomaly_alerting/*
