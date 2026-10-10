@@ -1,0 +1,29 @@
+# Dependencies & Environments
+node_modules/
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Build and Distribution
+dist/
+build/
+coverage/
+
+# Streamlit Local Cache
+.streamlit/
+
+# OS and Editor Artifacts
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+.vercel/
+
+# Environment Variables & Secrets
+.env*
+!.env.example

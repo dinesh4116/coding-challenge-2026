@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>QueryPilot // CORE ENGINE — Triage Workspace</title>
+<!-- Material Symbols Outlined font -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Space Grotesk & Space Mono fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-bright": "#2a3a4f",
+            "primary-fixed": "#dae2fd",
+            "on-primary-container": "#798098",
+            "inverse-on-surface": "#213145",
+            "on-primary": "#283044",
+            "inverse-primary": "#565e74",
+            "on-error": "#690005",
+            "on-secondary-fixed-variant": "#003ea8",
+            "surface-variant": "#26364a",
+            "on-tertiary-fixed": "#002114",
+            "primary-container": "#0f172a",
+            "on-background": "#d3e4fe",
+            "surface-tint": "#bec6e0",
+            "on-tertiary-container": "#009366",
+            "surface": "#031427",
+            "on-tertiary-fixed-variant": "#005137",
+            "on-tertiary": "#003825",
+            "surface-container-highest": "#26364a",
+            "secondary": "#b4c5ff",
+            "surface-container-lowest": "#000f21",
+            "primary-fixed-dim": "#bec6e0",
+            "secondary-fixed": "#dbe1ff",
+            "error": "#ffb4ab",
+            "inverse-surface": "#d3e4fe",
+            "on-primary-fixed-variant": "#3f465c",
+            "outline": "#909097",
+            "tertiary-container": "#001c10",
+            "error-container": "#93000a",
+            "on-surface": "#d3e4fe",
+            "primary": "#bec6e0",
+            "on-surface-variant": "#c6c6cd",
+            "surface-container-high": "#1b2b3f",
+            "secondary-fixed-dim": "#b4c5ff",
+            "on-error-container": "#ffdad6",
+            "tertiary-fixed-dim": "#68dba9",
+            "tertiary": "#68dba9",
+            "on-secondary": "#002a78",
+            "surface-dim": "#031427",
+            "surface-container-low": "#0b1c30",
+            "surface-container": "#102034",
+            "tertiary-fixed": "#85f8c4",
+            "background": "#031427",
+            "secondary-container": "#0053db",
+            "on-secondary-fixed": "#00174b",
+            "outline-variant": "#45464d",
+            "on-secondary-container": "#cdd7ff",
+            "on-primary-fixed": "#131b2e"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "1rem",
+            "space-xs": "0.25rem",
+            "gutter": "1px",
+            "gutter-loose": "0.5rem",
+            "space-xl": "1.5rem",
+            "margin-lg": "2rem",
+            "space-sm": "0.5rem",
+            "space-md": "0.75rem",
+            "space-lg": "1rem"
+          },
+          "fontFamily": {
+            "headline-sm": ["Space Grotesk"],
+            "label-md": ["Space Mono"],
+            "body-sm": ["Space Mono"],
+            "headline-lg": ["Space Grotesk"],
+            "label-sm": ["Space Mono"],
+            "body-lg": ["Space Mono"],
+            "tabular-data": ["Space Mono"],
+            "body-md": ["Space Mono"],
+            "headline-md": ["Space Grotesk"],
+            "headline-lg-mobile": ["Space Grotesk"],
+            "display": ["Space Grotesk"]
+          },
+          "fontSize": {
+            "headline-sm": ["1rem", { lineHeight: "1.3", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "label-md": ["0.6875rem", { lineHeight: "1", letterSpacing: "0.08em", fontWeight: "700" }],
+            "body-sm": ["0.75rem", { lineHeight: "1.4", letterSpacing: "0.01em", fontWeight: "400" }],
+            "headline-lg": ["2rem", { lineHeight: "1.15", letterSpacing: "-0.03em", fontWeight: "700" }],
+            "label-sm": ["0.625rem", { lineHeight: "1", letterSpacing: "0.1em", fontWeight: "700" }],
+            "body-lg": ["0.9375rem", { lineHeight: "1.5", letterSpacing: "-0.01em", fontWeight: "400" }],
+            "tabular-data": ["0.8125rem", { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "body-md": ["0.8125rem", { lineHeight: "1.5", letterSpacing: "0em", fontWeight: "400" }],
+            "headline-md": ["1.25rem", { lineHeight: "1.25", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "headline-lg-mobile": ["1.5rem", { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "display": ["3.5rem", { lineHeight: "1.05", letterSpacing: "-0.04em", fontWeight: "700" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Custom square checkboxes per style guidance without border radius */
+    input[type="checkbox"].terminal-check {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border: 1px solid #45464d;
+      background-color: transparent;
+      border-radius: 0px !important;
+      cursor: pointer;
+      display: inline-grid;
+      place-content: center;
+    }
+    input[type="checkbox"].terminal-check:checked {
+      border-color: #0053db;
+      background-color: #0053db;
+    }
+    input[type="checkbox"].terminal-check:checked::before {
+      content: "";
+      width: 4px;
+      height: 4px;
+      background-color: #ffffff;
+    }
+    /* Hide scrollbars for hyper-clean command line aesthetic */
+    .terminal-scroll::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .terminal-scroll::-webkit-scrollbar-track {
+      background: #000f21;
+    }
+    .terminal-scroll::-webkit-scrollbar-thumb {
+      background: #26364a;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface antialiased flex h-screen w-screen overflow-hidden select-none font-body-sm text-body-sm">
+<!-- ========================================================================= -->
+<!-- COMPONENT 1: SideNavBar (Precision Rail)                                 -->
+<!-- ========================================================================= -->
+<aside class="flex flex-col justify-between h-screen w-64 border-r border-outline-variant dark:border-outline-variant bg-surface-container-lowest dark:bg-surface-container-lowest select-none flex-shrink-0 z-30">
+<!-- Rail Header -->
+<div class="flex flex-col">
+<div class="h-10 px-margin flex items-center justify-between border-b border-outline-variant">
+<div class="flex items-center space-x-2">
+<!-- Geometric Q Logo Mark -->
+<div class="w-5 h-5 border border-secondary flex items-center justify-center bg-primary-container relative">
+<span class="text-secondary font-headline-sm text-headline-sm leading-none">Q</span>
+<span class="absolute bottom-0 right-0 w-1.5 h-1.5 bg-tertiary"></span>
+</div>
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface dark:text-on-surface uppercase tracking-tight">QueryPilot</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">v4.8.2-PROD</span>
+</div>
+<!-- Action CTA -->
+<div class="p-space-md border-b border-outline-variant">
+<button class="w-full bg-secondary-container hover:bg-surface-bright text-white text-label-sm font-label-sm py-2 px-space-md text-left flex items-center justify-between border border-secondary transition-none">
+<span>COMMIT ALL [CMD+K]</span>
+<span class="material-symbols-outlined text-sm leading-none" data-icon="keyboard_command_key">keyboard_command_key</span>
+</button>
+</div>
+<!-- Navigation Tabs (5 items, Triage Workspace is Active) -->
+<nav class="flex flex-col py-space-xs">
+<!-- 1: Overview -->
+<a class="flex items-center justify-between px-space-md py-2.5 text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-none text-label-sm font-label-sm" href="#overview">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-base" data-icon="dashboard">dashboard</span>
+<span>Overview</span>
+</div>
+</a>
+<!-- 2: Triage Workspace [ACTIVE] -->
+<a class="bg-secondary-container dark:bg-secondary-container text-on-secondary-container dark:text-on-secondary-container border-l-2 border-secondary font-bold flex items-center justify-between px-space-md py-2.5 transition-none text-label-sm font-label-sm" href="#triage">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-base text-secondary" data-icon="filter_alt">filter_alt</span>
+<span class="text-white">Triage Workspace</span>
+</div>
+<span class="w-1.5 h-1.5 bg-tertiary"></span>
+</a>
+<!-- 3: Review Queue -->
+<a class="flex items-center justify-between px-space-md py-2.5 text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-none text-label-sm font-label-sm" href="#review">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-base" data-icon="fact_check">fact_check</span>
+<span>Review Queue</span>
+</div>
+<span class="bg-surface-container-highest px-1 text-label-sm font-label-sm text-tertiary border border-outline-variant">428</span>
+</a>
+<!-- 4: Exports -->
+<a class="flex items-center justify-between px-space-md py-2.5 text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-none text-label-sm font-label-sm" href="#exports">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-base" data-icon="download">download</span>
+<span>Exports</span>
+</div>
+</a>
+<!-- 5: Settings -->
+<a class="flex items-center justify-between px-space-md py-2.5 text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-none text-label-sm font-label-sm" href="#settings">
+<div class="flex items-center space-x-2.5">
+<span class="material-symbols-outlined text-base" data-icon="settings">settings</span>
+<span>Settings</span>
+</div>
+</a>
+</nav>
+</div>
+<!-- Rail Footer with Telemetry -->
+<div class="border-t border-outline-variant flex flex-col bg-surface-container-lowest">
+<div class="p-space-md border-b border-outline-variant/60 flex flex-col space-y-1">
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-on-surface-variant flex items-center space-x-1">
+<span class="w-1.5 h-1.5 bg-tertiary mr-1 animate-pulse"></span> Engine: SciPy v1.11.4 Active
+          </span>
+</div>
+<div class="flex items-center justify-between text-label-sm font-label-sm text-outline">
+<span>MEM: 512MB / 4096MB</span>
+<span class="text-tertiary">12.5%</span>
+</div>
+</div>
+<div class="flex flex-col">
+<button class="flex items-center space-x-2 px-space-md py-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-sm" data-icon="memory">memory</span>
+<span>Engine Status</span>
+</button>
+<button class="flex items-center space-x-2 px-space-md py-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-sm" data-icon="receipt_long">receipt_long</span>
+<span>Audit Log</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- MAIN WORKSPACE CONTENT CONTAINER                                         -->
+<!-- ========================================================================= -->
+<div class="flex flex-col flex-1 h-screen overflow-hidden bg-surface">
+<!-- ========================================================================= -->
+<!-- COMPONENT 2: TopNavBar (Instrument Telemetry Bar)                         -->
+<!-- ========================================================================= -->
+<header class="flex justify-between items-center h-10 px-margin w-full border-b border-outline-variant dark:border-outline-variant bg-surface dark:bg-surface select-none flex-shrink-0 z-20">
+<div class="flex items-center space-x-4">
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface dark:text-on-surface tracking-wider">QueryPilot // CORE ENGINE</span>
+<div class="h-4 w-px bg-outline-variant"></div>
+<!-- Telemetry Items from JSON -->
+<div class="flex items-center space-x-3 text-label-sm font-label-sm">
+<span class="text-on-surface-variant hover:bg-surface-container-high px-1.5 py-0.5 border border-transparent hover:border-outline-variant cursor-pointer">Dataset: GA4_Q3_SYNTH</span>
+<span class="text-tertiary dark:text-tertiary font-bold border-b border-tertiary px-1 py-0.5">Engine: SciPy v1.11.4 Active</span>
+<span class="text-on-surface-variant px-1.5 py-0.5">Entropy: 0.142 nats</span>
+<span class="text-tertiary border border-tertiary/40 px-1.5 py-0.5 text-label-sm font-label-sm flex items-center space-x-1">
+<span class="w-1.5 h-1.5 bg-tertiary"></span>
+<span>State: SYNCED</span>
+</span>
+</div>
+</div>
+<!-- Trailing Action Cluster -->
+<div class="flex items-center space-x-2">
+<button class="bg-secondary-container hover:bg-surface-bright text-white text-label-sm font-label-sm py-1 px-3 border border-secondary transition-none">
+          BATCH EXECUTE
+        </button>
+<button class="bg-transparent hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface text-label-sm font-label-sm py-1 px-2.5 border border-outline-variant transition-none">
+          EXPORT AUDIT
+        </button>
+<div class="h-4 w-px bg-outline-variant mx-1"></div>
+<div class="flex items-center space-x-1 text-on-surface-variant">
+<button class="p-1 hover:bg-surface-container-high hover:text-on-surface transition-none" title="terminal">
+<span class="material-symbols-outlined text-sm leading-none" data-icon="terminal">terminal</span>
+</button>
+<button class="p-1 hover:bg-surface-container-high hover:text-on-surface transition-none" title="tune">
+<span class="material-symbols-outlined text-sm leading-none" data-icon="tune">tune</span>
+</button>
+<button class="p-1 hover:bg-surface-container-high hover:text-on-surface transition-none" title="help">
+<span class="material-symbols-outlined text-sm leading-none" data-icon="help">help</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Sub-Header: Context & Dataset Intelligence -->
+<div class="border-b border-outline-variant bg-surface-container-low px-margin py-2 flex flex-col md:flex-row md:items-center justify-between gap-2 flex-shrink-0">
+<div class="flex flex-col">
+<div class="text-label-sm font-label-sm text-outline flex items-center space-x-1.5">
+<span>SEARCH INTELLIGENCE</span>
+<span>/</span>
+<span class="text-secondary">DECISION WORKSPACE</span>
+</div>
+<div class="flex items-baseline space-x-3 mt-0.5">
+<h1 class="text-headline-md font-headline-md text-on-surface font-bold tracking-tight">Search Term Intelligence</h1>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Separate statistical signal from conversion noise.</span>
+</div>
+</div>
+<div class="flex items-center space-x-2">
+<div class="bg-surface-container-lowest border border-outline-variant px-2.5 py-1 text-label-sm font-label-sm flex items-center space-x-2">
+<span class="material-symbols-outlined text-xs text-tertiary" data-icon="inventory_2">inventory_2</span>
+<span class="text-on-surface font-body-sm">dataset_q3_official_search_terms.csv</span>
+<span class="text-outline">(24,812 rows, 100% schema match)</span>
+</div>
+<button class="border border-outline-variant bg-surface hover:bg-surface-container text-on-surface text-label-sm font-label-sm px-2.5 py-1 transition-none flex items-center space-x-1">
+<span class="material-symbols-outlined text-xs" data-icon="swap_horiz">swap_horiz</span>
+<span>Replace CSV</span>
+</button>
+<button class="border border-outline-variant bg-surface hover:bg-surface-container text-on-surface text-label-sm font-label-sm px-2.5 py-1 transition-none flex items-center space-x-1">
+<span class="material-symbols-outlined text-xs" data-icon="file_download">file_download</span>
+<span>Export Decision Set</span>
+</button>
+</div>
+</div>
+<!-- Decision Distribution Segmented Bar Strip -->
+<div class="border-b border-outline-variant bg-surface-container-lowest px-margin py-2 flex flex-col space-y-1.5 flex-shrink-0">
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-outline uppercase tracking-wider">Decision Capital Allocation &amp; Term Partitioning</span>
+<span class="text-on-surface-variant">TOTAL AD SPEND AUDITED: <strong class="text-on-surface font-tabular-data">$142,850.00</strong></span>
+</div>
+<!-- Stacked Visual Bar -->
+<div class="w-full h-2.5 flex bg-surface-container border border-outline-variant overflow-hidden">
+<div class="bg-[#059669] h-full" style="width: 1.3%" title="PROMOTE: 1.3%"></div>
+<div class="bg-[#DC2626] h-full" style="width: 6.0%" title="BLOCK: 6.0%"></div>
+<div class="bg-[#D97706] h-full" style="width: 1.7%" title="REVIEW: 1.7%"></div>
+<div class="bg-[#64748B] h-full" style="width: 91.0%" title="IGNORE: 91.0%"></div>
+</div>
+<!-- Distribution Metric Chips -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-2 pt-0.5">
+<div class="flex items-center justify-between border-l-2 border-[#059669] pl-2 bg-surface/40 py-1 pr-2">
+<span class="text-label-sm font-label-sm text-[#059669]">[PROMOTE]</span>
+<span class="text-label-sm font-label-sm text-on-surface font-tabular-data">312 terms (1.3%) • $28,400</span>
+</div>
+<div class="flex items-center justify-between border-l-2 border-[#DC2626] pl-2 bg-surface/40 py-1 pr-2">
+<span class="text-label-sm font-label-sm text-[#DC2626]">[BLOCK]</span>
+<span class="text-label-sm font-label-sm text-on-surface font-tabular-data">1,489 terms (6.0%) • $38,210</span>
+</div>
+<div class="flex items-center justify-between border-l-2 border-[#D97706] pl-2 bg-surface/40 py-1 pr-2">
+<span class="text-label-sm font-label-sm text-[#D97706]">[REVIEW (Uncertain)]</span>
+<span class="text-label-sm font-label-sm text-on-surface font-tabular-data">428 terms (1.7%) • $12,940</span>
+</div>
+<div class="flex items-center justify-between border-l-2 border-[#64748B] pl-2 bg-surface/40 py-1 pr-2">
+<span class="text-label-sm font-label-sm text-[#64748B]">[IGNORE (Sub-threshold)]</span>
+<span class="text-label-sm font-label-sm text-on-surface font-tabular-data">22,583 terms (91.0%) • $63,300</span>
+</div>
+</div>
+</div>
+<!-- Analyst Interactive Toolbar -->
+<div class="border-b border-outline-variant bg-surface px-margin py-2 flex flex-wrap items-center justify-between gap-2 flex-shrink-0">
+<div class="flex items-center space-x-2 flex-1 min-w-[320px]">
+<!-- Search Input -->
+<div class="relative flex-1 max-w-sm">
+<span class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-sm leading-none" data-icon="search">search</span>
+</span>
+<input class="w-full pl-7 pr-2 py-1 bg-primary-container border border-outline-variant focus:border-secondary-container focus:outline-none text-body-sm font-body-sm text-on-surface placeholder:text-outline/70" placeholder="FILTER SEARCH QUERIES [REGEX / KEYWORD]..." type="text" value=""/>
+</div>
+<!-- Filter Pill Tabs -->
+<div class="flex border border-outline-variant bg-surface-container-lowest p-0.5">
+<button class="px-2 py-0.5 text-label-sm font-label-sm bg-surface-container-high text-on-surface border border-outline-variant">All 24.8k</button>
+<button class="px-2 py-0.5 text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface">Promote 312</button>
+<button class="px-2 py-0.5 text-label-sm font-label-sm text-[#DC2626] hover:bg-surface-container">Block 1,489</button>
+<button class="px-2 py-0.5 text-label-sm font-label-sm text-[#D97706] hover:bg-surface-container">Review 428</button>
+<button class="px-2 py-0.5 text-label-sm font-label-sm text-outline hover:bg-surface-container">Ignore 22.5k</button>
+</div>
+<!-- Campaign Dropdown -->
+<select class="bg-primary-container border border-outline-variant text-body-sm font-body-sm text-on-surface py-1 px-2 focus:border-secondary-container">
+<option>Campaign: All Active Campaigns</option>
+<option selected="">Campaign: US_B2B_Billing_Core</option>
+<option>Campaign: Enterprise_Subscription_EMEA</option>
+</select>
+<!-- Match Type Selector -->
+<select class="bg-primary-container border border-outline-variant text-body-sm font-body-sm text-on-surface py-1 px-2 focus:border-secondary-container">
+<option>Match: All Types</option>
+<option>Exact</option>
+<option>Phrase</option>
+<option>Broad</option>
+</select>
+</div>
+<div class="flex items-center space-x-2">
+<!-- Threshold tuning telemetry indicator -->
+<div class="hidden xl:flex items-center space-x-2 px-2 py-1 border border-outline-variant bg-surface-container-lowest text-label-sm font-label-sm text-outline">
+<span>THRESHOLDS:</span>
+<span class="text-secondary font-tabular-data">α=0.05</span>
+<span>•</span>
+<span class="text-on-surface font-tabular-data">Min $150</span>
+<span>•</span>
+<span class="text-on-surface font-tabular-data">Conv ≥ 3</span>
+</div>
+<button class="bg-[#DC2626] hover:bg-[#b91c1c] text-white text-label-sm font-label-sm px-3 py-1 flex items-center space-x-1.5 border border-[#DC2626] transition-none">
+<span class="material-symbols-outlined text-xs leading-none" data-icon="block">block</span>
+<span>Approve High-Confidence Negatives (1,240 terms)</span>
+</button>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- SPLIT WORKSPACE: TABLE (68%) & FORENSIC DOSSIER (32%)                    -->
+<!-- ========================================================================= -->
+<div class="flex-1 flex overflow-hidden">
+<!-- ======================================================================= -->
+<!-- SECTION 5: Primary Triage Table (Occupies ~68% width)                  -->
+<!-- ======================================================================= -->
+<section class="w-full lg:w-[68%] border-r border-outline-variant flex flex-col h-full bg-surface-container-lowest">
+<!-- Table Scroll Container -->
+<div class="flex-1 overflow-auto terminal-scroll">
+<table class="w-full text-left border-collapse font-body-sm">
+<thead class="sticky top-0 z-10 bg-surface-container-low border-b border-outline-variant text-label-sm font-label-sm text-outline">
+<tr>
+<th class="p-2 w-8 text-center border-r border-outline-variant">
+<input class="terminal-check" type="checkbox"/>
+</th>
+<th class="p-2 border-r border-outline-variant">SEARCH TERM</th>
+<th class="p-2 border-r border-outline-variant">CAMPAIGN</th>
+<th class="p-2 border-r border-outline-variant">MATCH</th>
+<th class="p-2 text-right border-r border-outline-variant">IMP</th>
+<th class="p-2 text-right border-r border-outline-variant">CLICKS</th>
+<th class="p-2 text-right border-r border-outline-variant">CONV</th>
+<th class="p-2 text-right border-r border-outline-variant">COST</th>
+<th class="p-2 text-right border-r border-outline-variant">CPA</th>
+<th class="p-2 border-r border-outline-variant">DECISION</th>
+<th class="p-2">EVIDENCE SUFFICIENCY</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant text-body-sm">
+<!-- ROW 1 (SELECTED): 'free invoice template download' -->
+<tr class="bg-surface-bright/40 border-l-2 border-secondary font-tabular-data cursor-pointer hover:bg-surface-bright/60">
+<td class="p-2 text-center border-r border-outline-variant">
+<input checked="" class="terminal-check" type="checkbox"/>
+</td>
+<td class="p-2 font-mono text-on-surface font-bold border-r border-outline-variant">
+<div class="flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 bg-[#DC2626]"></span>
+<span>free invoice template download</span>
+</div>
+</td>
+<td class="p-2 text-outline border-r border-outline-variant truncate max-w-[120px]">US_B2B_Billing_Core</td>
+<td class="p-2 border-r border-outline-variant">
+<span class="px-1 py-0.5 text-label-sm font-label-sm border border-outline-variant text-outline bg-surface">BROAD</span>
+</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">3,120</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">248</td>
+<td class="p-2 text-right text-[#DC2626] font-bold border-r border-outline-variant">0</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">$842.50</td>
+<td class="p-2 text-right text-[#DC2626] border-r border-outline-variant">∞</td>
+<td class="p-2 border-r border-outline-variant">
+<span class="px-1.5 py-0.5 text-label-sm font-label-sm text-[#DC2626] border border-[#DC2626] bg-[#DC2626]/10">[BLOCK]</span>
+</td>
+<td class="p-2">
+<span class="text-label-sm font-label-sm text-[#DC2626] flex items-center space-x-1">
+<span class="material-symbols-outlined text-xs" data-icon="priority_high">priority_high</span>
+<span>Strong (p=0.002)</span>
+</span>
+</td>
+</tr>
+<!-- ROW 2: 'b2b automated billing software' -->
+<tr class="hover:bg-surface-container font-tabular-data cursor-pointer">
+<td class="p-2 text-center border-r border-outline-variant">
+<input class="terminal-check" type="checkbox"/>
+</td>
+<td class="p-2 font-mono text-on-surface border-r border-outline-variant">b2b automated billing software</td>
+<td class="p-2 text-outline border-r border-outline-variant truncate max-w-[120px]">US_B2B_Billing_Core</td>
+<td class="p-2 border-r border-outline-variant">
+<span class="px-1 py-0.5 text-label-sm font-label-sm border border-secondary text-secondary bg-surface">EXACT</span>
+</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">4,890</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">412</td>
+<td class="p-2 text-right text-tertiary font-bold border-r border-outline-variant">38</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">$2,410.00</td>
+<td class="p-2 text-right text-tertiary border-r border-outline-variant">$63.42</td>
+<td class="p-2 border-r border-outline-variant">
+<span class="px-1.5 py-0.5 text-label-sm font-label-sm text-[#059669] border border-[#059669] bg-[#059669]/10">[PROMOTE]</span>
+</td>
+<td class="p-2">
+<span class="text-label-sm font-label-sm text-tertiary">Sufficient n=412</span>
+</td>
+</tr>
+<!-- ROW 3: 'how to cancel billing software' -->
+<tr class="hover:bg-surface-container font-tabular-data cursor-pointer bg-surface/30">
+<td class="p-2 text-center border-r border-outline-variant">
+<input class="terminal-check" type="checkbox"/>
+</td>
+<td class="p-2 font-mono text-on-surface border-r border-outline-variant">how to cancel billing software</td>
+<td class="p-2 text-outline border-r border-outline-variant truncate max-w-[120px]">US_B2B_Billing_Core</td>
+<td class="p-2 border-r border-outline-variant">
+<span class="px-1 py-0.5 text-label-sm font-label-sm border border-outline text-outline bg-surface">PHRASE</span>
+</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">2,410</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">189</td>
+<td class="p-2 text-right text-[#DC2626] font-bold border-r border-outline-variant">0</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">$612.00</td>
+<td class="p-2 text-right text-[#DC2626] border-r border-outline-variant">∞</td>
+<td class="p-2 border-r border-outline-variant">
+<span class="px-1.5 py-0.5 text-label-sm font-label-sm text-[#DC2626] border border-[#DC2626] bg-[#DC2626]/10">[BLOCK]</span>
+</td>
+<td class="p-2">
+<span class="text-label-sm font-label-sm text-[#DC2626]">Strong p=0.008</span>
+</td>
+</tr>
+<!-- ROW 4: 'quickbooks alternative pricing' -->
+<tr class="hover:bg-surface-container font-tabular-data cursor-pointer">
+<td class="p-2 text-center border-r border-outline-variant">
+<input class="terminal-check" type="checkbox"/>
+</td>
+<td class="p-2 font-mono text-on-surface border-r border-outline-variant">quickbooks alternative pricing</td>
+<td class="p-2 text-outline border-r border-outline-variant truncate max-w-[120px]">Enterprise_Subscription</td>
+<td class="p-2 border-r border-outline-variant">
+<span class="px-1 py-0.5 text-label-sm font-label-sm border border-outline-variant text-outline bg-surface">BROAD</span>
+</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">1,200</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">94</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">2</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">$480.00</td>
+<td class="p-2 text-right text-[#D97706] border-r border-outline-variant">$240.00</td>
+<td class="p-2 border-r border-outline-variant">
+<span class="px-1.5 py-0.5 text-label-sm font-label-sm text-[#D97706] border border-[#D97706] bg-[#D97706]/10">[REVIEW]</span>
+</td>
+<td class="p-2">
+<span class="text-label-sm font-label-sm text-[#D97706]">Uncertain 95% CI [0.3%, 7.4%]</span>
+</td>
+</tr>
+<!-- ROW 5: 'enterprise subscription billing api' -->
+<tr class="hover:bg-surface-container font-tabular-data cursor-pointer bg-surface/30">
+<td class="p-2 text-center border-r border-outline-variant">
+<input class="terminal-check" type="checkbox"/>
+</td>
+<td class="p-2 font-mono text-on-surface border-r border-outline-variant">enterprise subscription billing api</td>
+<td class="p-2 text-outline border-r border-outline-variant truncate max-w-[120px]">Enterprise_Subscription</td>
+<td class="p-2 border-r border-outline-variant">
+<span class="px-1 py-0.5 text-label-sm font-label-sm border border-secondary text-secondary bg-surface">EXACT</span>
+</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">6,040</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">516</td>
+<td class="p-2 text-right text-tertiary font-bold border-r border-outline-variant">44</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">$3,840.00</td>
+<td class="p-2 text-right text-tertiary border-r border-outline-variant">$87.27</td>
+<td class="p-2 border-r border-outline-variant">
+<span class="px-1.5 py-0.5 text-label-sm font-label-sm text-[#059669] border border-[#059669] bg-[#059669]/10">[PROMOTE]</span>
+</td>
+<td class="p-2">
+<span class="text-label-sm font-label-sm text-tertiary">Sufficient n=516</span>
+</td>
+</tr>
+<!-- ROW 6: 'invoice template free word doc' -->
+<tr class="hover:bg-surface-container font-tabular-data cursor-pointer">
+<td class="p-2 text-center border-r border-outline-variant">
+<input class="terminal-check" type="checkbox"/>
+</td>
+<td class="p-2 font-mono text-outline border-r border-outline-variant">invoice template free word doc</td>
+<td class="p-2 text-outline border-r border-outline-variant truncate max-w-[120px]">US_B2B_Billing_Core</td>
+<td class="p-2 border-r border-outline-variant">
+<span class="px-1 py-0.5 text-label-sm font-label-sm border border-outline-variant text-outline bg-surface">BROAD</span>
+</td>
+<td class="p-2 text-right text-outline border-r border-outline-variant">320</td>
+<td class="p-2 text-right text-outline border-r border-outline-variant">14</td>
+<td class="p-2 text-right text-outline border-r border-outline-variant">0</td>
+<td class="p-2 text-right text-outline border-r border-outline-variant">$41.20</td>
+<td class="p-2 text-right text-outline border-r border-outline-variant">-</td>
+<td class="p-2 border-r border-outline-variant">
+<span class="px-1.5 py-0.5 text-label-sm font-label-sm text-[#64748B] border border-[#64748B] bg-[#64748B]/10">[IGNORE]</span>
+</td>
+<td class="p-2">
+<span class="text-label-sm font-label-sm text-outline">Low Spend &lt;$150</span>
+</td>
+</tr>
+<!-- ROW 7: 'billing system source code github' -->
+<tr class="hover:bg-surface-container font-tabular-data cursor-pointer bg-surface/30">
+<td class="p-2 text-center border-r border-outline-variant">
+<input class="terminal-check" type="checkbox"/>
+</td>
+<td class="p-2 font-mono text-on-surface border-r border-outline-variant">billing system source code github</td>
+<td class="p-2 text-outline border-r border-outline-variant truncate max-w-[120px]">US_B2B_Billing_Core</td>
+<td class="p-2 border-r border-outline-variant">
+<span class="px-1 py-0.5 text-label-sm font-label-sm border border-outline text-outline bg-surface">PHRASE</span>
+</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">2,880</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">176</td>
+<td class="p-2 text-right text-[#DC2626] font-bold border-r border-outline-variant">0</td>
+<td class="p-2 text-right text-on-surface border-r border-outline-variant">$522.40</td>
+<td class="p-2 text-right text-[#DC2626] border-r border-outline-variant">∞</td>
+<td class="p-2 border-r border-outline-variant">
+<span class="px-1.5 py-0.5 text-label-sm font-label-sm text-[#DC2626] border border-[#DC2626] bg-[#DC2626]/10">[BLOCK]</span>
+</td>
+<td class="p-2">
+<span class="text-label-sm font-label-sm text-[#DC2626]">Strong p=0.014</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Pagination Footer -->
+<div class="h-9 px-margin border-t border-outline-variant bg-surface-container-low flex items-center justify-between text-label-sm font-label-sm text-outline flex-shrink-0">
+<div>Showing 1-25 of 24,812 rows | Page 1 of 993</div>
+<div class="flex items-center space-x-1">
+<button class="px-2 py-0.5 border border-outline-variant bg-surface hover:bg-surface-container text-on-surface">PREV</button>
+<span class="px-2 py-0.5 bg-secondary-container text-white border border-secondary">1</span>
+<button class="px-2 py-0.5 border border-outline-variant bg-surface hover:bg-surface-container text-on-surface">2</button>
+<button class="px-2 py-0.5 border border-outline-variant bg-surface hover:bg-surface-container text-on-surface">3</button>
+<span class="px-1">...</span>
+<button class="px-2 py-0.5 border border-outline-variant bg-surface hover:bg-surface-container text-on-surface">993</button>
+<button class="px-2 py-0.5 border border-outline-variant bg-surface hover:bg-surface-container text-on-surface">NEXT</button>
+</div>
+</div>
+</section>
+<!-- ======================================================================= -->
+<!-- SECTION 6: Right-Hand Forensic Evidence Inspector (Occupies ~32% width) -->
+<!-- ======================================================================= -->
+<section class="w-full lg:w-[32%] flex flex-col h-full bg-surface-container-low overflow-y-auto terminal-scroll">
+<!-- Inspector Terminal Header Strip -->
+<div class="h-9 px-space-md border-b border-outline-variant bg-surface-container flex items-center justify-between flex-shrink-0">
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 bg-[#DC2626]"></span>
+<span class="text-label-sm font-label-sm font-bold text-on-surface uppercase tracking-wider">ACTIVE FORENSIC INSPECTION</span>
+</div>
+<span class="bg-surface-container-highest px-1.5 py-0.5 text-label-sm font-label-sm text-secondary border border-outline-variant">Row #1</span>
+</div>
+<!-- Target Search Term Header Dossier -->
+<div class="p-space-md border-b border-outline-variant bg-surface">
+<div class="text-label-sm font-label-sm text-outline uppercase tracking-tight">INSPECTED QUERY ENTITY</div>
+<div class="text-headline-sm font-headline-sm font-bold text-on-surface text-base mt-0.5 font-mono">free invoice template download</div>
+<div class="mt-2 flex flex-wrap gap-1.5 text-label-sm font-label-sm">
+<span class="px-1.5 py-0.5 bg-surface-container border border-outline-variant text-outline">Broad Match</span>
+<span class="px-1.5 py-0.5 bg-surface-container border border-outline-variant text-secondary">US_B2B_Billing_Core</span>
+<span class="px-1.5 py-0.5 bg-[#DC2626]/20 border border-[#DC2626] text-[#DC2626]">Negative Exact Recommended</span>
+</div>
+</div>
+<!-- 2x2 Forensic Metrics vs Campaign Baseline -->
+<div class="p-space-md border-b border-outline-variant flex flex-col space-y-2">
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider">Key Metrics vs Campaign Baseline</span>
+<div class="grid grid-cols-2 gap-gutter bg-outline-variant p-gutter">
+<!-- Metric 1: Clicks -->
+<div class="bg-surface p-2.5 flex flex-col justify-between">
+<span class="text-label-sm font-label-sm text-outline">Clicks</span>
+<div class="text-headline-sm font-headline-sm text-on-surface font-tabular-data mt-1">248</div>
+<div class="text-label-sm font-label-sm text-secondary mt-1">Baseline: 32 (+675% volume)</div>
+</div>
+<!-- Metric 2: Total Spend -->
+<div class="bg-surface p-2.5 flex flex-col justify-between">
+<span class="text-label-sm font-label-sm text-outline">Total Spend</span>
+<div class="text-headline-sm font-headline-sm text-on-surface font-tabular-data mt-1">$842.50</div>
+<div class="text-label-sm font-label-sm text-[#DC2626] mt-1">Baseline: $110 (High drain)</div>
+</div>
+<!-- Metric 3: Conversions -->
+<div class="bg-surface p-2.5 flex flex-col justify-between">
+<span class="text-label-sm font-label-sm text-outline">Conversions</span>
+<div class="text-headline-sm font-headline-sm text-[#DC2626] font-tabular-data mt-1">0</div>
+<div class="text-label-sm font-label-sm text-outline mt-1">Expected: 3.2 (0.0% conv rate)</div>
+</div>
+<!-- Metric 4: Cost Per Conv -->
+<div class="bg-surface p-2.5 flex flex-col justify-between">
+<span class="text-label-sm font-label-sm text-outline">Cost Per Conv</span>
+<div class="text-headline-sm font-headline-sm text-[#DC2626] font-tabular-data mt-1">∞</div>
+<div class="text-label-sm font-label-sm text-outline mt-1">Target CPA: $45.00 (Unprofitable)</div>
+</div>
+</div>
+</div>
+<!-- Statistical Transparency & Hypothesis Testing Section -->
+<div class="p-space-md border-b border-outline-variant flex flex-col space-y-2">
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider">Statistical Transparency &amp; Hypothesis Testing</span>
+<div class="border border-outline-variant bg-surface-container-lowest p-2.5 space-y-2">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant font-mono">Chi-Square Test p-value:</span>
+<span class="text-[#DC2626] font-bold font-tabular-data">0.0024</span>
+</div>
+<div class="text-label-sm font-label-sm text-[#DC2626] bg-[#DC2626]/10 px-1.5 py-0.5 border border-[#DC2626]/30">
+              p &lt; 0.01 Confirmed Waste
+            </div>
+<div class="h-px bg-outline-variant my-1"></div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant font-mono">Wilson Score 95% CI:</span>
+<span class="text-on-surface font-tabular-data font-mono">[0.000%, 1.488%]</span>
+</div>
+<div class="text-label-sm font-label-sm text-outline">
+              Account Baseline: <strong class="text-on-surface font-tabular-data">2.1%</strong> (Interval strictly excludes baseline)
+            </div>
+<div class="h-px bg-outline-variant my-1"></div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant font-mono">Statistical Power (1 - β):</span>
+<span class="text-tertiary font-bold font-tabular-data">0.998</span>
+</div>
+<div class="text-label-sm font-label-sm text-outline">
+              High sample sufficiency (Power &gt; 0.80 benchmark threshold)
+            </div>
+</div>
+<!-- Sample Evidence Verdict Banner -->
+<div class="border-l-2 border-[#DC2626] bg-surface p-2 text-label-sm font-label-sm text-[#DC2626] font-bold">
+            SUFFICIENT SAMPLE — ZERO CONVERSIONS CONFIRMED STATISTICALLY ANOMALOUS
+          </div>
+</div>
+<!-- Engine Rationale (Monospace Analytical Callout) -->
+<div class="p-space-md border-b border-outline-variant flex flex-col space-y-1 bg-surface">
+<div class="text-label-sm font-label-sm text-outline uppercase tracking-wider flex items-center space-x-1">
+<span class="material-symbols-outlined text-xs text-secondary" data-icon="psychology">psychology</span>
+<span>Engine Audit Rationale</span>
+</div>
+<div class="font-mono text-body-sm font-body-sm text-on-surface-variant bg-surface-container-lowest p-2.5 border border-outline-variant leading-relaxed">
+            Zero conversions observed across 248 clicks with $842.50 spend. Probability of true conversion rate matching account benchmark (2.1%) is p = 0.0024. Reject null hypothesis (H0). Immediate campaign-level negative keyword creation recommended to halt budget depletion.
+          </div>
+</div>
+<!-- Data Quality & Anomaly Checklist -->
+<div class="p-space-md border-b border-outline-variant flex flex-col space-y-2">
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider">Data Quality &amp; Anomaly Checklist</span>
+<div class="grid grid-cols-3 gap-1 text-label-sm font-label-sm">
+<div class="border border-outline-variant bg-surface p-1.5 flex flex-col">
+<span class="text-outline">Schema Check:</span>
+<span class="text-tertiary font-bold mt-0.5">VALID</span>
+</div>
+<div class="border border-outline-variant bg-surface p-1.5 flex flex-col">
+<span class="text-outline">Token Collisions:</span>
+<span class="text-tertiary font-bold mt-0.5">0 DETECTED</span>
+</div>
+<div class="border border-outline-variant bg-surface p-1.5 flex flex-col">
+<span class="text-outline">Currency Match:</span>
+<span class="text-tertiary font-bold mt-0.5">MATCH [USD]</span>
+</div>
+</div>
+</div>
+<!-- Inspector Action Drawer (Bottom Sticky) -->
+<div class="mt-auto p-space-md border-t border-outline-variant bg-surface-container flex flex-col space-y-2 flex-shrink-0">
+<button class="w-full bg-[#DC2626] hover:bg-[#b91c1c] text-white py-2 px-3 text-label-sm font-label-sm font-bold border border-[#DC2626] transition-none flex items-center justify-center space-x-1.5">
+<span class="material-symbols-outlined text-sm leading-none" data-icon="block">block</span>
+<span>Confirm BLOCK (Add Negative Keyword)</span>
+</button>
+<div class="grid grid-cols-2 gap-2">
+<button class="w-full border border-outline hover:border-tertiary text-on-surface hover:text-tertiary py-1.5 px-2 text-label-sm font-label-sm bg-surface transition-none">
+              Override: PROMOTE
+            </button>
+<button class="w-full border border-[#D97706] text-[#D97706] hover:bg-[#D97706]/10 py-1.5 px-2 text-label-sm font-label-sm bg-surface transition-none">
+              Flag for Manual Review
+            </button>
+</div>
+</div>
+</section>
+</div>
+</div>
+</body></html>

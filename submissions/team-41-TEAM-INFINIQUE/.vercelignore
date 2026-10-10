@@ -1,0 +1,20 @@
+# Tests and caches
+tests/
+.pytest_cache/
+__pycache__/
+
+# Scratch scripts and raw screenshots
+convert_html.py
+restore_stitch.py
+stitch_screen*
+app.py
+
+# Git & environments
+.git/
+.venv/
+venv/
+env/
+api/
+requirements*
+server.py
+triage/

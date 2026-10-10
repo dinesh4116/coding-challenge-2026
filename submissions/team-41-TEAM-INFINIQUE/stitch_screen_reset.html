@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>QueryPilot - Search Term Analysis</title>
+<!-- Google Font: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with forms and container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary-fixed": "#002114",
+            "surface": "#f6f9ff",
+            "on-primary": "#ffffff",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed-variant": "#93000b",
+            "on-secondary": "#ffffff",
+            "on-background": "#151c23",
+            "outline": "#747686",
+            "on-primary-fixed": "#001551",
+            "primary-fixed-dim": "#b7c4ff",
+            "on-tertiary": "#ffffff",
+            "on-primary-fixed-variant": "#0039b5",
+            "error-container": "#ffdad6",
+            "surface-container-high": "#e1e9f2",
+            "inverse-surface": "#293138",
+            "inverse-on-surface": "#eaf1fb",
+            "secondary-fixed-dim": "#68dba9",
+            "tertiary-fixed-dim": "#ffb4ab",
+            "surface-bright": "#f6f9ff",
+            "on-secondary-fixed-variant": "#005137",
+            "surface-container-low": "#edf4fe",
+            "tertiary-fixed": "#ffdad6",
+            "secondary-container": "#82f5c1",
+            "tertiary-container": "#bb0112",
+            "surface-container": "#e7eff8",
+            "surface-tint": "#2151da",
+            "primary": "#0037b0",
+            "secondary": "#006c4a",
+            "on-error-container": "#93000a",
+            "on-secondary-container": "#00714e",
+            "on-surface": "#151c23",
+            "outline-variant": "#c4c5d7",
+            "on-tertiary-container": "#ffc7c1",
+            "error": "#ba1a1a",
+            "primary-fixed": "#dce1ff",
+            "background": "#f6f9ff",
+            "tertiary": "#8f000b",
+            "surface-container-highest": "#dbe3ed",
+            "on-tertiary-fixed": "#410002",
+            "surface-dim": "#d3dbe4",
+            "primary-container": "#1d4ed8",
+            "inverse-primary": "#b7c4ff",
+            "on-surface-variant": "#434655",
+            "on-primary-container": "#cad3ff",
+            "surface-variant": "#dbe3ed",
+            "secondary-fixed": "#85f8c4",
+            "surface-container-lowest": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-md": "0.75rem",
+            "gutter-dense": "0.5rem",
+            "margin": "1.5rem",
+            "space-xl": "1.5rem",
+            "space-lg": "1rem",
+            "space-sm": "0.5rem",
+            "gutter": "1rem",
+            "space-2xl": "2rem",
+            "space-xxs": "0.125rem",
+            "margin-compact": "1rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "headline-sm": ["Inter"],
+            "headline-xl": ["Inter"],
+            "caption": ["Inter"],
+            "data-metric": ["Inter"],
+            "body-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "body-md": ["Inter"],
+            "label-sm": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-lg": ["Inter"]
+          },
+          "fontSize": {
+            "headline-sm": ["15px", { "lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "headline-xl": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "caption": ["10px", { "lineHeight": "12px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+            "data-metric": ["13px", { "lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-md": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+            "headline-lg": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 18px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    /* Tabular figures for institutional data terminals */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    /* Hairline borders */
+    .border-hairline {
+      border-color: #E2E5E8;
+    }
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F8F9FA;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CED4DA;
+      border-radius: 2px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #A0AAB5;
+    }
+  </style>
+</head>
+<body class="h-full bg-background font-body-md text-on-surface flex overflow-hidden antialiased select-none">
+<!-- ========================================================================= -->
+<!-- 1. LEFT NAVIGATION RAIL (Shared Component: SideNavBar)                      -->
+<!-- ========================================================================= -->
+<aside class="fixed top-0 left-0 h-screen w-64 bg-surface-container-lowest dark:bg-inverse-surface border-r border-outline-variant dark:border-outline z-40 flex flex-col justify-between">
+<!-- Top Brand & Main Nav Clusters -->
+<div class="flex flex-col p-4">
+<!-- Brand Header -->
+<div class="flex items-center gap-3 px-2 py-2 mb-4">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-white" data-icon="query_stats">query_stats</span>
+</div>
+<div class="flex flex-col">
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface dark:text-inverse-on-surface leading-tight">QueryPilot</span>
+<span class="text-caption font-caption text-on-surface-variant dark:text-outline-variant uppercase tracking-wider">Search Intelligence Suite</span>
+</div>
+</div>
+<!-- Dataset Upload CTA -->
+<button class="w-full mb-5 flex items-center justify-center gap-2 py-2 px-3 bg-surface-container hover:bg-surface-container-high transition-colors text-primary font-label-md text-label-md rounded border border-outline-variant">
+<span class="material-symbols-outlined text-primary" data-icon="upload_file">upload_file</span>
+<span>Import Dataset</span>
+</button>
+<!-- Navigation Links -->
+<nav class="flex flex-col space-y-1">
+<!-- Overview -->
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-outline-variant font-label-md text-label-md rounded hover:bg-surface-container-low dark:hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Overview</span>
+</a>
+<!-- Search Term Analysis (ACTIVE ITEM: Semantic mapping matched) -->
+<a class="flex items-center gap-3 px-3 py-2 bg-surface-container dark:bg-surface-container-highest text-primary dark:text-inverse-primary font-label-md text-label-md rounded border-l-2 border-primary dark:border-inverse-primary" href="#">
+<span class="material-symbols-outlined text-primary" data-icon="query_stats">query_stats</span>
+<span class="font-semibold flex-1">Search Term Analysis</span>
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+</a>
+<!-- Review Queue -->
+<a class="flex items-center justify-between px-3 py-2 text-on-surface-variant dark:text-outline-variant font-label-md text-label-md rounded hover:bg-surface-container-low dark:hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined" data-icon="rate_review">rate_review</span>
+<span>Review Queue</span>
+</div>
+<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-tertiary-container/10 text-tertiary border border-tertiary/20 tabular-nums">14</span>
+</a>
+<!-- Exports -->
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-outline-variant font-label-md text-label-md rounded hover:bg-surface-container-low dark:hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="file_download">file_download</span>
+<span>Exports</span>
+</a>
+<!-- Analysis Settings -->
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-outline-variant font-label-md text-label-md rounded hover:bg-surface-container-low dark:hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span>Analysis Settings</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Footer Meta & Operator Profile -->
+<div class="p-4 border-t border-outline-variant/60 flex flex-col space-y-3">
+<!-- Engine Diagnostics badge -->
+<div class="p-2.5 rounded bg-surface-container-low border border-outline-variant/40 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[16px]" data-icon="terminal">terminal</span>
+<div class="flex flex-col">
+<span class="text-caption font-caption text-on-surface-variant font-medium">System Diagnostics</span>
+<span class="text-[11px] font-data-metric text-on-surface tabular-nums">Healthy · 48,290 terms</span>
+</div>
+</div>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<!-- User Operator Profile -->
+<div class="flex items-center gap-3 px-2 py-1.5 hover:bg-surface-container rounded transition-colors cursor-pointer">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant border border-outline-variant/60 font-semibold text-xs">
+          OP
+        </div>
+<div class="flex flex-col flex-1 min-w-0">
+<span class="text-label-md font-label-md text-on-surface truncate">E. Vance (Operator)</span>
+<span class="text-[10px] text-on-surface-variant truncate">Paid Media Director</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]" data-icon="unfold_more">unfold_more</span>
+</div>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- MAIN WORKSPACE CONTAINER (Offset from Left Nav by w-64)                    -->
+<!-- ========================================================================= -->
+<div class="ml-64 flex-1 flex flex-col h-screen min-w-0 overflow-hidden bg-background">
+<!-- ======================================================================= -->
+<!-- 2. TOP NAV / WORKSPACE HEADER (Shared Component: TopNavBar)              -->
+<!-- ======================================================================= -->
+<header class="flex items-center justify-between w-full h-14 px-6 bg-surface-container-lowest border-b border-outline-variant sticky top-0 z-30 shrink-0">
+<!-- Breadcrumb Context & Dataset metadata -->
+<div class="flex items-center gap-3 min-w-0">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]" data-icon="analytics">analytics</span>
+<span class="text-headline-sm font-headline-sm text-on-surface font-semibold truncate">Q3 Paid Media Audit - Google Ads Core</span>
+<span class="text-outline-variant">/</span>
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface-variant tabular-nums">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container border border-outline-variant/50 text-[11px] font-medium text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+            Validated Live
+          </span>
+<span class="text-[12px]">Dataset: <code class="font-mono text-[11px] text-primary">Q3_GoogleAds_Core_SearchTerms.csv</code></span>
+<span>·</span>
+<span class="text-[12px] font-data-metric">48,290 Records</span>
+<span>·</span>
+<span class="text-caption font-caption text-outline">Computed: Today 09:14 AM</span>
+</div>
+</div>
+<!-- Trailing Action Operations -->
+<div class="flex items-center gap-2.5 shrink-0">
+<button class="h-8 px-2.5 flex items-center gap-1.5 bg-surface-container-lowest hover:bg-surface-container text-on-surface text-label-md font-label-md rounded border border-outline-variant transition-colors" title="Reload Dataset Analysis">
+<span class="material-symbols-outlined text-[16px]" data-icon="refresh">refresh</span>
+<span>Recalibrate</span>
+</button>
+<button class="h-8 px-2.5 flex items-center gap-1.5 bg-surface-container-lowest hover:bg-surface-container text-on-surface text-label-md font-label-md rounded border border-outline-variant transition-colors" title="Configuration Rules">
+<span class="material-symbols-outlined text-[16px]" data-icon="tune">tune</span>
+<span>Thresholds</span>
+</button>
+<div class="h-4 w-px bg-outline-variant mx-1"></div>
+<button class="h-8 px-3.5 flex items-center gap-1.5 bg-primary hover:bg-primary-container text-on-primary text-label-md font-label-md rounded shadow-sm transition-colors">
+<span class="material-symbols-outlined text-[16px] text-white" data-icon="file_download">file_download</span>
+<span>Export Decision CSV</span>
+</button>
+</div>
+</header>
+<!-- ======================================================================= -->
+<!-- 3. WORKSPACE INNER LAYOUT: Table Matrix + Contextual Evidence Inspector -->
+<!-- ======================================================================= -->
+<div class="flex-1 flex min-h-0 overflow-hidden">
+<!-- ===================================================================== -->
+<!-- CENTRAL ANALYTICAL WORKSPACE (Table + Header Analytics)                -->
+<!-- ===================================================================== -->
+<main class="flex-1 flex flex-col min-w-0 overflow-y-auto border-r border-outline-variant bg-surface-container-lowest">
+<!-- Workspace Editorial Data Header -->
+<section class="p-6 border-b border-outline-variant bg-surface-container-lowest flex flex-col gap-4">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center gap-2">
+<h1 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">Search Term Analysis</h1>
+<span class="px-2 py-0.5 rounded text-[11px] font-medium bg-primary/10 text-primary border border-primary/20">Bayesian Core v4.2</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant mt-0.5">
+                Evaluate search-term performance, assess evidence quality, and identify the advertising decisions that warrant attention.
+              </p>
+</div>
+<!-- Quick View Status pill -->
+<div class="flex items-center gap-4 text-body-sm font-body-sm text-on-surface-variant bg-surface-container-low px-3 py-1.5 rounded border border-outline-variant/60 tabular-nums">
+<div>Total Spend: <span class="font-data-metric text-on-surface font-semibold">$142,850.40</span></div>
+<div class="h-3 w-px bg-outline-variant"></div>
+<div>Evaluated: <span class="font-data-metric text-on-surface font-semibold">48,290 Terms</span></div>
+<div class="h-3 w-px bg-outline-variant"></div>
+<div>Decision Coverage: <span class="font-data-metric text-secondary font-semibold">100.0%</span></div>
+</div>
+</div>
+<!-- Calibrated Multi-Segment Evidence Distribution Bar & Breakdown -->
+<div class="p-3.5 rounded bg-surface-container-low border border-outline-variant/70 flex flex-col gap-3">
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-on-surface font-semibold uppercase tracking-wider text-[10px]">Decision Allocation Matrix</span>
+<span class="text-on-surface-variant tabular-nums text-[11px]">48,290 search terms classified against target Bayesian confidence boundaries</span>
+</div>
+<!-- Proportional Multi-Segment Bar -->
+<div class="w-full h-3 rounded flex overflow-hidden bg-surface-container-highest border border-outline-variant/40">
+<!-- Promote: 312 (~0.65% volume, visually balanced at 4% min visibility) -->
+<div class="h-full bg-secondary hover:opacity-90 transition-opacity cursor-pointer" style="width: 5.5%;" title="PROMOTE: 312 terms ($18,420 spend)"></div>
+<!-- Block: 1,420 (~2.94% volume, given 14% visually for data interaction) -->
+<div class="h-full bg-tertiary hover:opacity-90 transition-opacity cursor-pointer" style="width: 14.5%;" title="BLOCK: 1,420 terms ($34,180 spend)"></div>
+<!-- Review: 588 (~1.22% volume, given 8% visually) -->
+<div class="h-full bg-amber-500 hover:opacity-90 transition-opacity cursor-pointer" style="width: 9.0%;" title="REVIEW: 588 terms ($21,950 spend)"></div>
+<!-- Ignore: 45,970 (~95.19% volume) -->
+<div class="h-full bg-outline-variant hover:opacity-90 transition-opacity cursor-pointer" style="width: 71.0%;" title="IGNORE: 45,970 terms ($68,300 spend)"></div>
+</div>
+<!-- Legend & Metric Breakdowns -->
+<div class="grid grid-cols-4 gap-3 pt-1 text-body-sm font-body-sm">
+<!-- Promote -->
+<div class="flex items-center gap-2 p-1.5 rounded bg-surface-container-lowest border border-outline-variant/50">
+<span class="w-2.5 h-2.5 rounded-sm bg-secondary shrink-0"></span>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-semibold text-secondary text-label-sm font-label-sm">PROMOTE</span>
+<span class="text-on-surface font-data-metric tabular-nums font-semibold">312</span>
+</div>
+<span class="text-[11px] text-on-surface-variant tabular-nums">$18,420 spend (12.9%)</span>
+</div>
+</div>
+<!-- Block -->
+<div class="flex items-center gap-2 p-1.5 rounded bg-surface-container-lowest border border-outline-variant/50">
+<span class="w-2.5 h-2.5 rounded-sm bg-tertiary shrink-0"></span>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-semibold text-tertiary text-label-sm font-label-sm">BLOCK</span>
+<span class="text-on-surface font-data-metric tabular-nums font-semibold">1,420</span>
+</div>
+<span class="text-[11px] text-on-surface-variant tabular-nums">$34,180 spend (23.9%)</span>
+</div>
+</div>
+<!-- Review -->
+<div class="flex items-center gap-2 p-1.5 rounded bg-surface-container-lowest border border-outline-variant/50">
+<span class="w-2.5 h-2.5 rounded-sm bg-amber-500 shrink-0"></span>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-semibold text-amber-800 text-label-sm font-label-sm">REVIEW</span>
+<span class="text-on-surface font-data-metric tabular-nums font-semibold">588</span>
+</div>
+<span class="text-[11px] text-on-surface-variant tabular-nums">$21,950 spend (15.4%)</span>
+</div>
+</div>
+<!-- Ignore -->
+<div class="flex items-center gap-2 p-1.5 rounded bg-surface-container-lowest border border-outline-variant/50">
+<span class="w-2.5 h-2.5 rounded-sm bg-outline-variant shrink-0"></span>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-semibold text-on-surface-variant text-label-sm font-label-sm">IGNORE</span>
+<span class="text-on-surface font-data-metric tabular-nums font-semibold">45,970</span>
+</div>
+<span class="text-[11px] text-on-surface-variant tabular-nums">$68,300 spend (47.8%)</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Table Toolbar & Filters -->
+<div class="px-6 py-2.5 border-b border-outline-variant bg-surface-container-lowest flex items-center justify-between gap-4">
+<!-- Search input -->
+<div class="flex-1 max-w-md relative">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" data-icon="search">search</span>
+<input class="w-full h-8 pl-8 pr-12 text-body-md font-body-md bg-surface-container-lowest border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-on-surface-variant/60" placeholder="Filter search terms, campaigns, or query strings..." type="text" value="enterprise cloud"/>
+<span class="absolute right-2 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded text-[10px] bg-surface-container text-on-surface-variant font-mono">⌘K</span>
+</div>
+<!-- Quick Decision Segmented Controls -->
+<div class="flex items-center gap-1.5">
+<span class="text-caption font-caption text-on-surface-variant uppercase mr-1">Decision:</span>
+<button class="h-7 px-2.5 text-label-sm font-label-sm rounded bg-surface-container text-on-surface font-medium border border-outline-variant">
+              All (48.2k)
+            </button>
+<button class="h-7 px-2.5 text-label-sm font-label-sm rounded bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#059669]"></span>
+              PROMOTE (312)
+            </button>
+<button class="h-7 px-2.5 text-label-sm font-label-sm rounded bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA] flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#DC2626]"></span>
+              BLOCK (1.4k)
+            </button>
+<button class="h-7 px-2.5 text-label-sm font-label-sm rounded bg-[#FFFBEB] text-[#92400E] border border-[#FDE68A] flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+              REVIEW (588)
+            </button>
+<button class="h-7 px-2.5 text-label-sm font-label-sm rounded bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] flex items-center gap-1">
+              IGNORE (45k)
+            </button>
+</div>
+<!-- Evidence and Match Type selectors -->
+<div class="flex items-center gap-2">
+<select class="h-8 text-label-sm font-label-sm bg-surface-container-lowest border border-outline-variant rounded px-2 text-on-surface py-0 pr-7">
+<option>Match: All Types</option>
+<option>Exact Match</option>
+<option>Phrase Match</option>
+<option>Broad Match</option>
+</select>
+<select class="h-8 text-label-sm font-label-sm bg-surface-container-lowest border border-outline-variant rounded px-2 text-on-surface py-0 pr-7">
+<option>Evidence: All Qualities</option>
+<option>Sufficient Confidence (≥95%)</option>
+<option>Limited Evidence</option>
+<option>Inconclusive Noise</option>
+</select>
+</div>
+</div>
+<!-- High-Density Search Term Table -->
+<div class="flex-1 overflow-auto">
+<table class="w-full text-left border-collapse tabular-nums">
+<thead>
+<tr class="h-9 bg-surface-container-low border-b border-outline-variant text-label-sm font-label-sm text-on-surface-variant uppercase sticky top-0 z-20">
+<th class="w-8 px-3 text-center">
+<input class="rounded border-outline-variant text-primary focus:ring-0 w-3.5 h-3.5 cursor-pointer" type="checkbox"/>
+</th>
+<th class="px-3 py-1 font-semibold text-on-surface">Search Term</th>
+<th class="px-3 py-1 font-semibold">Matched Campaign</th>
+<th class="px-2 py-1 font-semibold w-24">Match Type</th>
+<th class="px-3 py-1 font-semibold text-right w-20">Clicks</th>
+<th class="px-3 py-1 font-semibold text-right w-20">Conv</th>
+<th class="px-3 py-1 font-semibold text-right w-24">Cost</th>
+<th class="px-3 py-1 font-semibold text-right w-28">Cost / Conv</th>
+<th class="px-3 py-1 font-semibold w-28">Decision</th>
+<th class="px-3 py-1 font-semibold w-48">Evidence Assessment</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/60 font-body-sm text-body-sm">
+<!-- ROW 1: ACTIVE / SELECTED ROW -->
+<tr class="h-10 bg-[#EFF6FF] border-l-2 border-l-primary hover:bg-[#EBF3FF] cursor-pointer transition-colors">
+<td class="w-8 px-3 text-center">
+<input checked="" class="rounded border-primary text-primary focus:ring-0 w-3.5 h-3.5 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-3 py-1 font-medium text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[15px]" data-icon="radio_button_checked">radio_button_checked</span>
+<span class="font-semibold text-primary font-mono text-[12px]">enterprise cloud migration roadmap</span>
+</td>
+<td class="px-3 py-1 text-on-surface-variant truncate max-w-[180px]" title="NA_Cloud_Infrastructure_Enterprise">
+                  NA_Cloud_Infrastructure_Enterprise
+                </td>
+<td class="px-2 py-1">
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-[10px] font-mono text-on-surface-variant border border-outline-variant/40">Exact</span>
+</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface font-medium">482</td>
+<td class="px-3 py-1 text-right font-data-metric text-secondary font-bold">38</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface">$3,840.00</td>
+<td class="px-3 py-1 text-right font-data-metric text-secondary font-semibold">$101.05</td>
+<td class="px-3 py-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-label-sm font-label-sm bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] font-semibold">
+<span class="material-symbols-outlined text-[13px] text-[#059669]" data-icon="add_circle">add_circle</span>
+                    PROMOTE
+                  </span>
+</td>
+<td class="px-3 py-1">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#059669]"></span>
+<span class="text-on-surface text-[11px] font-medium">Sufficient (98% Conf)</span>
+</div>
+</td>
+</tr>
+<!-- ROW 2: PROMOTE -->
+<tr class="h-10 hover:bg-surface-container-low cursor-pointer transition-colors">
+<td class="w-8 px-3 text-center">
+<input class="rounded border-outline-variant text-primary focus:ring-0 w-3.5 h-3.5 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-3 py-1 font-medium text-on-surface">
+<span class="font-mono text-[12px]">aws azure hybrid migration cost</span>
+</td>
+<td class="px-3 py-1 text-on-surface-variant truncate max-w-[180px]">
+                  Cloud_Architecture_Hybrid_HighIntent
+                </td>
+<td class="px-2 py-1">
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-[10px] font-mono text-on-surface-variant border border-outline-variant/40">Phrase</span>
+</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface">319</td>
+<td class="px-3 py-1 text-right font-data-metric text-secondary font-bold">24</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface">$2,790.50</td>
+<td class="px-3 py-1 text-right font-data-metric text-secondary font-semibold">$116.27</td>
+<td class="px-3 py-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-label-sm font-label-sm bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] font-semibold">
+<span class="material-symbols-outlined text-[13px] text-[#059669]" data-icon="add_circle">add_circle</span>
+                    PROMOTE
+                  </span>
+</td>
+<td class="px-3 py-1">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#059669]"></span>
+<span class="text-on-surface text-[11px]">Sufficient (95% Conf)</span>
+</div>
+</td>
+</tr>
+<!-- ROW 3: BLOCK (Wasted Spend) -->
+<tr class="h-10 hover:bg-surface-container-low cursor-pointer transition-colors">
+<td class="w-8 px-3 text-center">
+<input class="rounded border-outline-variant text-primary focus:ring-0 w-3.5 h-3.5 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-3 py-1 font-medium text-on-surface">
+<span class="font-mono text-[12px] text-tertiary">free download cloud template pdf</span>
+</td>
+<td class="px-3 py-1 text-on-surface-variant truncate max-w-[180px]">
+                  NA_Cloud_Infrastructure_Enterprise
+                </td>
+<td class="px-2 py-1">
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-[10px] font-mono text-on-surface-variant border border-outline-variant/40">Broad</span>
+</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface">640</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface-variant">0</td>
+<td class="px-3 py-1 text-right font-data-metric text-tertiary font-medium">$2,140.80</td>
+<td class="px-3 py-1 text-right font-data-metric text-tertiary">— (No Conv)</td>
+<td class="px-3 py-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-label-sm font-label-sm bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA] font-semibold">
+<span class="material-symbols-outlined text-[13px] text-[#DC2626]" data-icon="block">block</span>
+                    BLOCK
+                  </span>
+</td>
+<td class="px-3 py-1">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span class="text-tertiary text-[11px] font-medium">Threshold Exceeded</span>
+</div>
+</td>
+</tr>
+<!-- ROW 4: BLOCK (Irrelevant Intent) -->
+<tr class="h-10 hover:bg-surface-container-low cursor-pointer transition-colors">
+<td class="w-8 px-3 text-center">
+<input class="rounded border-outline-variant text-primary focus:ring-0 w-3.5 h-3.5 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-3 py-1 font-medium text-on-surface">
+<span class="font-mono text-[12px] text-tertiary">cloud consulting salary entry level</span>
+</td>
+<td class="px-3 py-1 text-on-surface-variant truncate max-w-[180px]">
+                  Services_Consulting_General
+                </td>
+<td class="px-2 py-1">
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-[10px] font-mono text-on-surface-variant border border-outline-variant/40">Phrase</span>
+</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface">288</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface-variant">0</td>
+<td class="px-3 py-1 text-right font-data-metric text-tertiary font-medium">$1,420.00</td>
+<td class="px-3 py-1 text-right font-data-metric text-tertiary">— (No Conv)</td>
+<td class="px-3 py-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-label-sm font-label-sm bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA] font-semibold">
+<span class="material-symbols-outlined text-[13px] text-[#DC2626]" data-icon="block">block</span>
+                    BLOCK
+                  </span>
+</td>
+<td class="px-3 py-1">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span class="text-on-surface-variant text-[11px]">Irrelevant Intent</span>
+</div>
+</td>
+</tr>
+<!-- ROW 5: REVIEW (Conflicting Evidence) -->
+<tr class="h-10 hover:bg-surface-container-low cursor-pointer transition-colors">
+<td class="w-8 px-3 text-center">
+<input class="rounded border-outline-variant text-primary focus:ring-0 w-3.5 h-3.5 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-3 py-1 font-medium text-on-surface">
+<span class="font-mono text-[12px]">cloud migration consulting services nyc</span>
+</td>
+<td class="px-3 py-1 text-on-surface-variant truncate max-w-[180px]">
+                  Services_Consulting_Geo_NYC
+                </td>
+<td class="px-2 py-1">
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-[10px] font-mono text-on-surface-variant border border-outline-variant/40">Phrase</span>
+</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface">54</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface">2</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface">$592.00</td>
+<td class="px-3 py-1 text-right font-data-metric text-amber-800 font-semibold">$296.00</td>
+<td class="px-3 py-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-label-sm font-label-sm bg-[#FFFBEB] text-[#92400E] border border-[#FDE68A] font-semibold">
+<span class="material-symbols-outlined text-[13px] text-amber-600" data-icon="flag">flag</span>
+                    REVIEW
+                  </span>
+</td>
+<td class="px-3 py-1">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+<span class="text-on-surface-variant text-[11px]">Conflicting (n=54)</span>
+</div>
+</td>
+</tr>
+<!-- ROW 6: IGNORE (Inconclusive Noise) -->
+<tr class="h-10 hover:bg-surface-container-low cursor-pointer transition-colors">
+<td class="w-8 px-3 text-center">
+<input class="rounded border-outline-variant text-primary focus:ring-0 w-3.5 h-3.5 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-3 py-1 font-medium text-on-surface">
+<span class="font-mono text-[12px] text-on-surface-variant">what is multicloud storage</span>
+</td>
+<td class="px-3 py-1 text-on-surface-variant truncate max-w-[180px]">
+                  NA_Cloud_Infrastructure_General
+                </td>
+<td class="px-2 py-1">
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-[10px] font-mono text-on-surface-variant border border-outline-variant/40">Broad</span>
+</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface-variant">14</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface-variant">0</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface-variant">$28.40</td>
+<td class="px-3 py-1 text-right font-data-metric text-outline">—</td>
+<td class="px-3 py-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-label-sm font-label-sm bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB] font-medium">
+<span class="material-symbols-outlined text-[13px] text-outline" data-icon="remove">remove</span>
+                    IGNORE
+                  </span>
+</td>
+<td class="px-3 py-1">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="text-on-surface-variant/80 text-[11px]">Inconclusive Noise</span>
+</div>
+</td>
+</tr>
+<!-- ROW 7: PROMOTE -->
+<tr class="h-10 hover:bg-surface-container-low cursor-pointer transition-colors">
+<td class="w-8 px-3 text-center">
+<input class="rounded border-outline-variant text-primary focus:ring-0 w-3.5 h-3.5 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-3 py-1 font-medium text-on-surface">
+<span class="font-mono text-[12px]">managed kubernetes cluster migration</span>
+</td>
+<td class="px-3 py-1 text-on-surface-variant truncate max-w-[180px]">
+                  Kubernetes_Orchestration_LeadGen
+                </td>
+<td class="px-2 py-1">
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-[10px] font-mono text-on-surface-variant border border-outline-variant/40">Exact</span>
+</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface">210</td>
+<td class="px-3 py-1 text-right font-data-metric text-secondary font-bold">19</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface">$1,980.20</td>
+<td class="px-3 py-1 text-right font-data-metric text-secondary font-semibold">$104.22</td>
+<td class="px-3 py-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-label-sm font-label-sm bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] font-semibold">
+<span class="material-symbols-outlined text-[13px] text-[#059669]" data-icon="add_circle">add_circle</span>
+                    PROMOTE
+                  </span>
+</td>
+<td class="px-3 py-1">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#059669]"></span>
+<span class="text-on-surface text-[11px]">Sufficient (96% Conf)</span>
+</div>
+</td>
+</tr>
+<!-- ROW 8: BLOCK -->
+<tr class="h-10 hover:bg-surface-container-low cursor-pointer transition-colors">
+<td class="w-8 px-3 text-center">
+<input class="rounded border-outline-variant text-primary focus:ring-0 w-3.5 h-3.5 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-3 py-1 font-medium text-on-surface">
+<span class="font-mono text-[12px] text-tertiary">open source cloud migration github</span>
+</td>
+<td class="px-3 py-1 text-on-surface-variant truncate max-w-[180px]">
+                  NA_Cloud_Infrastructure_Enterprise
+                </td>
+<td class="px-2 py-1">
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-[10px] font-mono text-on-surface-variant border border-outline-variant/40">Broad</span>
+</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface">412</td>
+<td class="px-3 py-1 text-right font-data-metric text-on-surface-variant">0</td>
+<td class="px-3 py-1 text-right font-data-metric text-tertiary font-medium">$1,895.00</td>
+<td class="px-3 py-1 text-right font-data-metric text-tertiary">—</td>
+<td class="px-3 py-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-label-sm font-label-sm bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA] font-semibold">
+<span class="material-symbols-outlined text-[13px] text-[#DC2626]" data-icon="block">block</span>
+                    BLOCK
+                  </span>
+</td>
+<td class="px-3 py-1">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span class="text-tertiary text-[11px] font-medium">Zero-Intent Pattern</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Pagination & Operational Footer -->
+<div class="h-11 px-6 border-t border-outline-variant bg-surface-container-lowest flex items-center justify-between shrink-0">
+<div class="flex items-center gap-3 text-body-sm font-body-sm text-on-surface-variant tabular-nums">
+<span>Showing <span class="text-on-surface font-semibold">1-25</span> of <span class="text-on-surface font-semibold">48,290</span> terms</span>
+<span class="text-outline-variant">|</span>
+<span>Selected: <span class="text-primary font-semibold">1 row</span> (enterprise cloud migration roadmap)</span>
+</div>
+<div class="flex items-center gap-3">
+<!-- Density Toggle -->
+<div class="flex items-center gap-1 border border-outline-variant rounded p-0.5 bg-surface-container-low">
+<button class="px-2 py-0.5 text-[11px] font-medium rounded bg-surface-container-lowest text-on-surface shadow-xs">Normal</button>
+<button class="px-2 py-0.5 text-[11px] font-medium text-on-surface-variant hover:text-on-surface">Dense</button>
+</div>
+<!-- Page Buttons -->
+<div class="flex items-center gap-1">
+<button class="w-7 h-7 flex items-center justify-center rounded border border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[16px]" data-icon="chevron_left">chevron_left</span>
+</button>
+<span class="px-2 text-label-sm font-label-sm text-on-surface tabular-nums">Page 1 of 1,932</span>
+<button class="w-7 h-7 flex items-center justify-center rounded border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- ===================================================================== -->
+<!-- 4. CONTEXTUAL EVIDENCE INSPECTOR (Dedicated Right Panel, 420px)       -->
+<!-- ===================================================================== -->
+<aside class="w-[420px] bg-surface-container-lowest flex flex-col h-full border-l border-outline-variant shrink-0 overflow-y-auto">
+<!-- Inspector Header -->
+<div class="h-14 px-5 border-b border-outline-variant flex items-center justify-between bg-surface-container-lowest shrink-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="insights">insights</span>
+<span class="text-headline-sm font-headline-sm text-on-surface font-semibold">Evidence Inspector</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-[10px] text-on-surface-variant font-mono">Row 1 Selected</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-1 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container" title="Popout Inspector">
+<span class="material-symbols-outlined text-[16px]" data-icon="open_in_new">open_in_new</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container" title="Close Panel">
+<span class="material-symbols-outlined text-[16px]" data-icon="close">close</span>
+</button>
+</div>
+</div>
+<div class="p-5 flex flex-col space-y-6">
+<!-- Section 1: Term Identity & Assigned Decision -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="text-caption font-caption text-on-surface-variant uppercase tracking-wider">Search Term Identity</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-label-sm font-label-sm bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] font-semibold">
+<span class="material-symbols-outlined text-[12px] text-[#059669]" data-icon="check_circle">check_circle</span>
+                RECOMMENDED: PROMOTE
+              </span>
+</div>
+<h2 class="text-headline-md font-headline-md text-on-surface font-mono break-all leading-snug">
+              enterprise cloud migration roadmap
+            </h2>
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface-variant">
+<span>Campaign:</span>
+<code class="px-1.5 py-0.5 bg-surface-container text-on-surface font-mono text-[11px] rounded border border-outline-variant/40">
+                NA_Cloud_Infrastructure_Enterprise
+              </code>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant bg-surface-container-low p-2.5 rounded border border-outline-variant/60">
+              Strong conversion evidence relative to campaign baseline at statistically significant volume.
+            </p>
+</div>
+<!-- Section 2: Observed Performance (Key Metrics Grid) -->
+<div class="flex flex-col gap-2">
+<span class="text-caption font-caption text-on-surface-variant uppercase tracking-wider">Observed Performance</span>
+<div class="grid grid-cols-3 gap-2 tabular-nums">
+<div class="p-2.5 rounded bg-surface-container-lowest border border-outline-variant">
+<span class="text-caption font-caption text-on-surface-variant block">Clicks</span>
+<span class="text-headline-sm font-headline-sm font-semibold text-on-surface">482</span>
+</div>
+<div class="p-2.5 rounded bg-surface-container-lowest border border-outline-variant">
+<span class="text-caption font-caption text-on-surface-variant block">Conversions</span>
+<span class="text-headline-sm font-headline-sm font-semibold text-secondary">38</span>
+</div>
+<div class="p-2.5 rounded bg-surface-container-lowest border border-outline-variant">
+<span class="text-caption font-caption text-on-surface-variant block">Conv Rate</span>
+<span class="text-headline-sm font-headline-sm font-semibold text-secondary">7.88%</span>
+</div>
+<div class="p-2.5 rounded bg-surface-container-lowest border border-outline-variant col-span-1">
+<span class="text-caption font-caption text-on-surface-variant block">Total Spend</span>
+<span class="text-headline-sm font-headline-sm font-semibold text-on-surface">$3,840.00</span>
+</div>
+<div class="p-2.5 rounded bg-surface-container-lowest border border-outline-variant col-span-2">
+<div class="flex items-center justify-between">
+<span class="text-caption font-caption text-on-surface-variant">Cost / Conv</span>
+<span class="text-[10px] text-secondary font-medium">-38.7% vs Target</span>
+</div>
+<div class="flex items-baseline gap-2 mt-0.5">
+<span class="text-headline-sm font-headline-sm font-semibold text-secondary">$101.05</span>
+<span class="text-[11px] text-on-surface-variant line-through">$165.00 target</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 3: Statistical Evidence Assessment -->
+<div class="flex flex-col gap-3 p-3.5 rounded bg-surface-container-low border border-outline-variant">
+<div class="flex items-center justify-between">
+<span class="text-caption font-caption text-on-surface uppercase font-semibold tracking-wider">Statistical Evidence</span>
+<span class="text-[11px] font-medium text-secondary tabular-nums">p &lt; 0.004 (High Confidence)</span>
+</div>
+<div class="space-y-2 text-body-sm font-body-sm">
+<div class="flex justify-between border-b border-outline-variant/40 pb-1">
+<span class="text-on-surface-variant">Observed Conv Rate:</span>
+<span class="font-data-metric text-on-surface font-semibold tabular-nums">7.88% <span class="text-on-surface-variant font-normal">[95% CI: 5.6% — 10.4%]</span></span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/40 pb-1">
+<span class="text-on-surface-variant">Campaign Benchmark:</span>
+<span class="font-data-metric text-on-surface tabular-nums">3.20%</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant/40 pb-1">
+<span class="text-on-surface-variant">Relative Lift vs Baseline:</span>
+<span class="font-data-metric text-secondary font-semibold tabular-nums">+146.2%</span>
+</div>
+</div>
+<!-- Visual Interval Comparison Bar (Baseline vs Observed 95% CI) -->
+<div class="mt-1 flex flex-col gap-1.5">
+<span class="text-[10px] text-on-surface-variant uppercase tracking-wider">Bayesian Credible Interval vs Baseline:</span>
+<div class="relative w-full h-8 bg-surface-container-lowest border border-outline-variant rounded p-1 flex items-center">
+<!-- Benchmark marker at 3.2% (visual pos ~25%) -->
+<div class="absolute left-[25%] top-0 bottom-0 w-0.5 bg-outline z-10" title="Baseline 3.2%"></div>
+<span class="absolute left-[26%] top-1 text-[9px] font-mono text-outline">Base 3.2%</span>
+<!-- 95% CI range (5.6% to 10.4% -> visual pos ~44% to 84%) -->
+<div class="absolute left-[44%] w-[40%] h-3 bg-secondary/20 rounded-sm border-l-2 border-r-2 border-secondary flex items-center justify-center">
+<!-- Mean marker -->
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+</div>
+</div>
+<div class="flex justify-between text-[10px] text-on-surface-variant font-mono tabular-nums">
+<span>0.0%</span>
+<span>5.6% (Low)</span>
+<span class="text-secondary font-semibold">7.88% (Mean)</span>
+<span>10.4% (High)</span>
+<span>12.5%</span>
+</div>
+</div>
+<div class="p-2 rounded bg-surface-container-lowest border border-outline-variant/40 text-[11px] text-on-surface-variant">
+<span class="font-semibold text-on-surface">Sufficiency Verification:</span> Volume (482 clicks) comfortably surpasses the minimum Bayesian threshold of 120 clicks for alpha = 0.05.
+            </div>
+</div>
+<!-- Section 4: Decision Rationale -->
+<div class="flex flex-col gap-1.5">
+<span class="text-caption font-caption text-on-surface-variant uppercase tracking-wider">Decision Rationale</span>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant rounded text-body-sm font-body-sm text-on-surface leading-relaxed">
+              Search term exhibits sustained high-intent conversion velocity exceeding campaign baseline targets by <strong>2.4x</strong>. Cost per acquisition is <strong>38.7% below</strong> the configured maximum tolerance limit ($165.00). High epistemic certainty warrants active extraction from broad/phrase matching groups into targeted isolation.
+            </div>
+</div>
+<!-- Section 5: Recommended Action Directive -->
+<div class="flex flex-col gap-1.5">
+<span class="text-caption font-caption text-on-surface-variant uppercase tracking-wider">Prescribed Action</span>
+<div class="p-3 bg-[#ECFDF5] border border-[#A7F3D0] rounded text-body-sm font-body-sm text-[#065F46] flex items-start gap-2.5">
+<span class="material-symbols-outlined text-[18px] text-[#059669] shrink-0 mt-0.5" data-icon="verified">verified</span>
+<div>
+<strong>Add as Exact Match Keyword:</strong> Create dedicated ad-group inside <em>Campaign tier 1 (NA_Cloud_Core)</em> with target CPA $120.00 and evaluate budget expansion of +15%.
+              </div>
+</div>
+</div>
+<!-- Section 6: Operational Action Buttons -->
+<div class="pt-2 flex flex-col gap-2">
+<button class="w-full h-9 flex items-center justify-center gap-2 bg-primary hover:bg-primary-container text-on-primary text-label-md font-label-md rounded font-semibold transition-colors">
+<span class="material-symbols-outlined text-[16px] text-white" data-icon="playlist_add_check">playlist_add_check</span>
+<span>Queue for Export (Promote Exact)</span>
+</button>
+<div class="grid grid-cols-2 gap-2">
+<button class="h-8 flex items-center justify-center gap-1.5 bg-surface-container-lowest hover:bg-surface-container text-on-surface text-label-sm font-label-sm rounded border border-outline-variant transition-colors">
+<span class="material-symbols-outlined text-[15px] text-amber-600" data-icon="flag">flag</span>
+<span>Flag for Human Review</span>
+</button>
+<button class="h-8 flex items-center justify-center gap-1.5 bg-surface-container-lowest hover:bg-surface-container text-on-surface text-label-sm font-label-sm rounded border border-outline-variant transition-colors">
+<span class="material-symbols-outlined text-[15px] text-on-surface-variant" data-icon="data_object">data_object</span>
+<span>Raw Query Logs</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</body></html>

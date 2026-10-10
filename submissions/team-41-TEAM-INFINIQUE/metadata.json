@@ -1,0 +1,6 @@
+{
+  "name": "DevSprint PS-01: Search Term Triage Engine",
+  "description": "Deterministic statistical search term triage engine using Empirical Bayes shrinkage, Wilson confidence intervals, exact binomial tail tests, and Benjamini-Hochberg FDR adjustment.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
