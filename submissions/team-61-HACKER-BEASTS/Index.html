@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Message Match Auditor</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>Message Match Auditor</h1>
+    <p>Check whether an advertisement matches its landing page.</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>1. Advertisement</h2>
+
+      <label for="headline">Ad headline</label>
+      <input id="headline" placeholder="Get your loan approved in 24 hours">
+
+      <label for="description">Ad description</label>
+      <textarea id="description" placeholder="Enter the ad description"></textarea>
+
+      <label for="cta">Call to action</label>
+      <input id="cta" placeholder="Apply Now">
+    </section>
+
+    <section class="panel">
+      <h2>2. Landing page</h2>
+
+      <label for="pageUrl">Landing page URL (optional)</label>
+      <input id="pageUrl" type="url" placeholder="https://example.com">
+
+      <label for="pageText">Landing page text</label>
+      <textarea id="pageText" placeholder="Paste the website text here"></textarea>
+
+      <div class="actions">
+        <button id="exampleBtn" class="secondary">Load Example</button>
+        <button id="auditBtn">Audit Message Match</button>
+        <button id="clearBtn" class="secondary">Clear</button>
+      </div>
+      <p class="hint">Paste the page text yourself. This version does not fetch websites automatically.</p>
+    </section>
+
+    <section id="results" class="panel" hidden aria-live="polite">
+      <h2>3. Audit results</h2>
+      <p id="score"></p>
+      <p id="summary"></p>
+      <div id="findings"></div>
+      <button id="downloadBtn">Download JSON Report</button>
+    </section>
+  </main>
+
+  <footer>Hackathon prototype · HTML, CSS and JavaScript</footer>
+</body>
+</html>

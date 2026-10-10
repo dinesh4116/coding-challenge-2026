@@ -1,0 +1,156 @@
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+  color: #1e293b;
+  line-height: 1.5;
+}
+
+header {
+  background: #172554;
+  color: white;
+  text-align: center;
+  padding: 30px 16px;
+}
+
+header h1 {
+  margin: 0 0 8px;
+}
+
+header p {
+  margin: 0;
+  color: #dbeafe;
+}
+
+main {
+  max-width: 850px;
+  margin: 28px auto;
+  padding: 0 16px;
+}
+
+.panel {
+  background: white;
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 12px #0f172a0d;
+}
+
+h2 {
+  color: #172554;
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin: 16px 0 6px;
+}
+
+input,
+textarea {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  font: inherit;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid #93c5fd;
+  border-color: #2563eb;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+button {
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 7px;
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(0.92);
+}
+
+button.secondary {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.hint {
+  color: #64748b;
+  font-size: 13px;
+}
+
+#score {
+  font-size: 28px;
+  font-weight: bold;
+  color: #1d4ed8;
+}
+
+.finding {
+  padding: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+}
+
+.finding h3 {
+  margin-top: 0;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.status.review {
+  color: #b45309;
+}
+
+.status.ok {
+  color: #15803d;
+}
+
+blockquote {
+  margin: 8px 0;
+  padding: 10px;
+  background: #f1f5f9;
+  border-left: 3px solid #60a5fa;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  .panel {
+    padding: 16px;
+  }
+}
+
