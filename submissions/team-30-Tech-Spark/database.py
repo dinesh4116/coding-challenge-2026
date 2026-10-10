@@ -666,3 +666,75 @@ def clear_all_data(synthetic_only: bool = False, db_path: Optional[Path] = None)
         if delete_project(p["project_id"], db_path=db_path):
             deleted_count += 1
     return deleted_count
+
+
+class WorkspaceStorage:
+    """High-level SQLite workspace persistence facade wrapping project/dataset/asset/analysis storage."""
+
+    def __init__(self, db_path: Optional[Path] = None) -> None:
+        self.db_path = db_path
+        init_db(self.db_path)
+
+    def _ensure_project(self, project_id: str, is_synthetic: bool = False) -> str:
+        existing = get_project(project_id, db_path=self.db_path)
+        if existing:
+            return project_id
+        proj = create_project(
+            name=f"Workspace ({project_id})",
+            description="Persisted AdCreative Intelligence Workspace",
+            is_synthetic=is_synthetic,
+            db_path=self.db_path,
+        )
+        return str(proj["project_id"])
+
+    def save_performance_df(self, project_id: str, df: pd.DataFrame, is_synthetic: bool = False) -> str:
+        pid = self._ensure_project(project_id, is_synthetic=is_synthetic)
+        return save_project_dataset(
+            project_id=pid,
+            name="Active Performance Dataset",
+            df=df,
+            matched_count=len(df),
+            unmatched_records=[],
+            unmatched_images=[],
+            warnings=[],
+            errors=[],
+            is_synthetic=is_synthetic,
+            db_path=self.db_path,
+        )
+
+    def save_extracted_features(
+        self,
+        project_id: str,
+        features_dict: Dict[str, Dict[str, Any]],
+        images_dict: Optional[Dict[str, Any]] = None,
+    ) -> List[Dict[str, Any]]:
+        pid = self._ensure_project(project_id)
+        return save_project_assets(
+            project_id=pid,
+            images_dict=images_dict or {},
+            features_dict=features_dict,
+            db_path=self.db_path,
+        )
+
+    def save_findings(
+        self,
+        project_id: str,
+        findings: List[Any],
+        summary_metrics: Optional[Dict[str, Any]] = None,
+        is_synthetic: bool = False,
+    ) -> str:
+        pid = self._ensure_project(project_id, is_synthetic=is_synthetic)
+        return save_project_analysis(
+            project_id=pid,
+            dataset_id="active",
+            findings=findings,
+            summary_metrics=summary_metrics or {},
+            is_synthetic=is_synthetic,
+            db_path=self.db_path,
+        )
+
+
+def get_storage(db_path: Optional[Path] = None) -> WorkspaceStorage:
+    """Returns an initialized WorkspaceStorage instance backed by SQLite."""
+    return WorkspaceStorage(db_path=db_path)
+
