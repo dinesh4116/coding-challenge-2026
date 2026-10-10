@@ -1,0 +1,435 @@
+from pathlib import Path
+import json
+import re
+import numpy as np
+import pandas as pd
+import streamlit as st
+from PIL import Image
+from scipy.stats import spearmanr
+
+st.set_page_config(
+page_title="CreativeIQ - Ad Creative Intelligence",
+page_icon="📊",
+layout="wide"
+)
+
+st.title("CreativeIQ - Ad Creative Intelligence")
+st.write(
+"Analyze advertising images and identify creative attributes "
+"associated with ad performance."
+)
+
+DATA_DIR = Path("data")
+IMAGE_DIR = DATA_DIR / "images"
+METRICS_FILE = DATA_DIR / "ad_metrics.csv"
+FEATURE_FILE = DATA_DIR / "image_features.csv"
+
+IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+
+ATTRIBUTE_NAMES = [
+"red_background",
+"blue_background",
+"green_background",
+"dark_background",
+"light_background",
+"has_text",
+"text_area_ratio",
+"brightness",
+"contrast",
+"saturation",
+"red_ratio",
+"blue_ratio",
+"green_ratio",
+"warm_color_ratio",
+"edge_density",
+"aspect_ratio",
+"image_area"
+]
+
+def extract_image_features(image_path):
+image = Image.open(image_path).convert("RGB")
+image.thumbnail((256, 256))
+
+pixels = np.asarray(image, dtype=np.float32) / 255.0  
+red = pixels[:, :, 0]  
+green = pixels[:, :, 1]  
+blue = pixels[:, :, 2]  
+
+brightness = float(np.mean(pixels))  
+contrast = float(np.std(pixels))  
+
+saturation = (  
+    np.max(pixels, axis=2) - np.min(pixels, axis=2)  
+)  
+
+red_ratio = float(np.mean(  
+    (red > green * 1.15) & (red > blue * 1.15)  
+))  
+blue_ratio = float(np.mean(  
+    (blue > red * 1.15) & (blue > green * 1.05)  
+))  
+green_ratio = float(np.mean(  
+    (green > red * 1.10) & (green > blue * 1.10)  
+))  
+
+gray = np.mean(pixels, axis=2)  
+
+edge_x = np.abs(np.diff(gray, axis=1))  
+edge_y = np.abs(np.diff(gray, axis=0))  
+
+edge_density = float(  
+    (np.mean(edge_x > 0.1) + np.mean(edge_y > 0.1)) / 2  
+)  
+
+height, width = pixels.shape[:2]  
+
+return {  
+    "red_background": int(  
+        red_ratio > 0.35 and brightness > 0.2  
+    ),  
+    "blue_background": int(blue_ratio > 0.35),  
+    "green_background": int(green_ratio > 0.35),  
+    "dark_background": int(brightness < 0.35),  
+    "light_background": int(brightness > 0.65),  
+    "has_text": 0,  
+    "text_area_ratio": 0.0,  
+    "brightness": brightness,  
+    "contrast": contrast,  
+    "saturation": float(np.mean(saturation)),  
+    "red_ratio": red_ratio,  
+    "blue_ratio": blue_ratio,  
+    "green_ratio": green_ratio,  
+    "warm_color_ratio": float(np.mean(  
+        (red > blue * 1.15) & (green > blue * 1.05)  
+    )),  
+    "edge_density": edge_density,  
+    "aspect_ratio": width / max(height, 1),  
+    "image_area": width * height  
+}
+
+def calculate_metrics(data):
+data = data.copy()
+
+data["ctr"] = np.where(  
+    data["impressions"] > 0,  
+    data["clicks"] / data["impressions"] * 100,  
+    np.nan  
+)  
+
+data["conversion_rate"] = np.where(  
+    data["clicks"] > 0,  
+    data["conversions"] / data["clicks"] * 100,  
+    np.nan  
+)  
+
+data["cpc"] = np.where(  
+    data["clicks"] > 0,  
+    data["spend"] / data["clicks"],  
+    np.nan  
+)  
+
+data["cpa"] = np.where(  
+    data["conversions"] > 0,  
+    data["spend"] / data["conversions"],  
+    np.nan  
+)  
+
+return data
+
+def load_data():
+if not METRICS_FILE.exists():
+return pd.DataFrame()
+
+data = pd.read_csv(METRICS_FILE)  
+
+required = [  
+    "creative_id",  
+    "spend",  
+    "impressions",  
+    "clicks",  
+    "conversions"  
+]  
+
+if not all(column in data.columns for column in required):  
+    st.error(  
+        "The CSV must contain creative_id, spend, impressions, "  
+        "clicks, and conversions."  
+    )  
+    return pd.DataFrame()  
+
+data["creative_id"] = data["creative_id"].astype(str)  
+return data
+
+def analyze_attributes(data):
+results = []
+
+for attribute in ATTRIBUTE_NAMES:  
+    if attribute not in data.columns:  
+        continue  
+
+    subset = data[  
+        [attribute, "ctr", "conversion_rate", "conversions"]  
+    ].dropna()  
+
+    if len(subset) < 5 or subset[attribute].nunique() < 2:  
+        results.append({  
+            "Attribute": attribute,  
+            "Sample size": len(subset),  
+            "Effect size": np.nan,  
+            "Spearman correlation": np.nan,  
+            "P-value": np.nan,  
+            "Confidence": "Insufficient data"  
+        })  
+        continue  
+
+    correlation, p_value = spearmanr(  
+        subset[attribute],  
+        subset["ctr"]  
+    )  
+
+    groups = subset.groupby(  
+        subset[attribute] > subset[attribute].median()  
+    )["ctr"].mean()  
+
+    effect = (  
+        groups.get(True, np.nan) - groups.get(False, np.nan)  
+    )  
+
+    if len(subset) < 30:  
+        confidence = "Low"  
+    elif p_value < 0.05:  
+        confidence = "Potential association"  
+    else:  
+        confidence = "Uncertain"  
+
+    results.append({  
+        "Attribute": attribute,  
+        "Sample size": len(subset),  
+        "Effect size": effect,  
+        "Spearman correlation": correlation,  
+        "P-value": p_value,  
+        "Confidence": confidence  
+    })  
+
+result = pd.DataFrame(results)  
+
+if not result.empty:  
+    result["Absolute correlation"] = (  
+        result["Spearman correlation"].abs()  
+    )  
+    result = result.sort_values(  
+        "Absolute correlation",  
+        ascending=False,  
+        na_position="last"  
+    )  
+
+return result
+
+def create_sample_data():
+rng = np.random.default_rng(42)
+count = 150
+
+sample = pd.DataFrame({  
+    "creative_id": [f"AD_{i:03d}" for i in range(1, count + 1)],  
+    "spend": rng.uniform(100, 5000, count),  
+    "impressions": rng.integers(5000, 100000, count),  
+    "clicks": rng.integers(50, 3000, count),  
+    "conversions": rng.integers(1, 250, count)  
+})  
+
+for attribute in ATTRIBUTE_NAMES:  
+    if attribute in sample.columns:  
+        continue  
+
+    if attribute in [  
+        "red_background", "blue_background",  
+        "green_background", "dark_background",  
+        "light_background", "has_text"  
+    ]:  
+        sample[attribute] = rng.integers(0, 2, count)  
+    else:  
+        sample[attribute] = rng.uniform(0, 1, count)  
+
+sample.to_csv(METRICS_FILE, index=False)  
+return sample
+
+def main():
+st.sidebar.header("Controls")
+
+if st.sidebar.button("Create demo dataset"):  
+    demo = create_sample_data()  
+    st.sidebar.success(  
+        f"Created {len(demo)} demo records."  
+    )  
+
+uploaded_csv = st.sidebar.file_uploader(  
+    "Upload ad metrics CSV",  
+    type=["csv"]  
+)  
+
+uploaded_images = st.sidebar.file_uploader(  
+    "Upload ad images",  
+    type=["png", "jpg", "jpeg", "webp"],  
+    accept_multiple_files=True  
+)  
+
+if uploaded_csv is not None:  
+    data = pd.read_csv(uploaded_csv)  
+    data["creative_id"] = data["creative_id"].astype(str)  
+    data.to_csv(METRICS_FILE, index=False)  
+
+if uploaded_images:  
+    for uploaded_image in uploaded_images:  
+        safe_name = re.sub(  
+            r"[^A-Za-z0-9_.-]",  
+            "_",  
+            uploaded_image.name  
+        )  
+
+        image_path = IMAGE_DIR / safe_name  
+        image_path.write_bytes(uploaded_image.getvalue())  
+
+data = load_data()  
+
+if data.empty:  
+    st.info(  
+        "Upload your ad metrics CSV or click 'Create demo dataset' "  
+        "in the sidebar to explore the application."  
+    )  
+    return  
+
+image_records = []  
+
+for image_path in IMAGE_DIR.iterdir():  
+    if image_path.suffix.lower() not in [  
+        ".png", ".jpg", ".jpeg", ".webp"  
+    ]:  
+        continue  
+
+    try:  
+        features = extract_image_features(image_path)  
+        features["creative_id"] = image_path.stem  
+        image_records.append(features)  
+    except Exception:  
+        continue  
+
+if image_records:  
+    image_data = pd.DataFrame(image_records)  
+    image_data["creative_id"] = image_data["creative_id"].astype(str)  
+
+    data["image_key"] = data["creative_id"].str.lower()  
+    image_data["image_key"] = image_data["creative_id"].str.lower()  
+
+    data = data.merge(  
+        image_data.drop(columns=["creative_id"]),  
+        on="image_key",  
+        how="left",  
+        suffixes=("", "_image")  
+    )  
+
+    data.drop(columns=["image_key"], inplace=True)  
+
+data = calculate_metrics(data)  
+
+st.subheader("Performance Overview")  
+
+col1, col2, col3, col4 = st.columns(4)  
+
+col1.metric("Total Creatives", len(data))  
+col2.metric(  
+    "Total Spend",  
+    f"₹{data['spend'].sum():,.2f}"  
+)  
+col3.metric(  
+    "Average CTR",  
+    f"{data['ctr'].mean():.2f}%"  
+)  
+col4.metric(  
+    "Total Conversions",  
+    f"{data['conversions'].sum():,.0f}"  
+)  
+
+st.divider()  
+
+st.subheader("Creative Performance Data")  
+st.dataframe(data, use_container_width=True)  
+
+st.subheader("Attribute Analysis")  
+
+results = analyze_attributes(data)  
+
+if results.empty:  
+    st.warning("No attributes are available for analysis.")  
+else:  
+    st.dataframe(results, use_container_width=True)  
+
+    supported = results[  
+        results["Sample size"] >= 30  
+    ].copy()  
+
+    st.subheader("Ranked Findings")  
+
+    if supported.empty:  
+        st.warning(  
+            "No finding has at least 30 usable observations. "  
+            "Collect more data before making strong conclusions."  
+        )  
+    else:  
+        for _, row in supported.head(10).iterrows():  
+            st.markdown(  
+                f"**{row['Attribute']}** — "  
+                f"Sample size: {int(row['Sample size'])}; "  
+                f"CTR correlation: "  
+                f"{row['Spearman correlation']:.3f}; "  
+                f"p-value: {row['P-value']:.4f}; "  
+                f"Status: {row['Confidence']}"  
+            )  
+
+st.divider()  
+
+st.subheader("Creative Brief Suggestions")  
+
+if not results.empty:  
+    reliable = results[  
+        (results["Sample size"] >= 30)  
+        & (results["P-value"] < 0.05)  
+        & results["Spearman correlation"].notna()  
+    ]  
+
+    if reliable.empty:  
+        st.write(  
+            "There are not enough statistically supported findings "  
+            "to recommend a specific creative attribute. "  
+            "Test new variations and gather more data."  
+        )  
+    else:  
+        for _, row in reliable.head(5).iterrows():  
+            direction = (  
+                "positive"  
+                if row["Spearman correlation"] > 0  
+                else "negative"  
+            )  
+
+            st.write(  
+                f"- Test variations of **{row['Attribute']}**. "  
+                f"The observed relationship with CTR is {direction}. "  
+                "Validate the result using a controlled experiment."  
+            )  
+
+st.caption(  
+    "Important: These are associations, not proof of causation. "  
+    "Synthetic demo data is for testing the app only. "  
+    "Image-based text detection is not implemented in this version."  
+)  
+
+csv_data = data.to_csv(index=False).encode("utf-8")  
+
+st.download_button(  
+    "Download Analysis CSV",  
+    data=csv_data,  
+    file_name="creativeiq_analysis.csv",  
+    mime="text/csv"  
+)
+
+if name == "main":
+main()

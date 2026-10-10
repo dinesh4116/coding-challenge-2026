@@ -1,0 +1,38 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "1. Install backend",
+      "type": "shell",
+      "command": "if (!(Test-Path venv)) { python -m venv venv }; .\\venv\\Scripts\\pip install -r requirements.txt",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "2. Build web app",
+      "type": "shell",
+      "command": "if (!(Test-Path node_modules)) { npm.cmd install }; npm.cmd run build",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "3. Run SearchPilot AI (http://localhost:8000)",
+      "type": "shell",
+      "command": ".\\venv\\Scripts\\python -m uvicorn main:app --host 127.0.0.1 --port 8000",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Setup everything and run",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "1. Install backend",
+        "2. Build web app",
+        "3. Run SearchPilot AI (http://localhost:8000)"
+      ],
+      "problemMatcher": [],
+      "group": { "kind": "build", "isDefault": true }
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+        self.assertEqual(stats['snapshots_found'], 60)
+        self.assertEqual(self.client.get('/api/ads').get_json()['total'], 60)
+    def test_audit_quotes_are_source_grounded(self):
+        for pair in ['P01', 'P02', 'P03', 'P20', 'P40', 'P60']:
+            response = self.client.get('/api/audit/' + pair)
+            self.assertEqual(response.status_code, 200)
+            result = response.get_json()
+            self.assertTrue(0 <= result['score'] <= 100)
+            source = auditor.snapshot_for(auditor.BY_ID[pair])['text']
+            for claim in result['claims']:
+                if claim['evidence']:
+                    self.assertIn(claim['evidence'], source)
+    def test_unknown_pair_returns_404(self):
+        self.assertEqual(self.client.get('/api/audit/P99').status_code, 404)
+    def test_report_download(self):
+        response = self.client.get('/api/report/P01.json')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('application/json', response.content_type)
+    def test_snapshot_view(self):
+        response = self.client.get('/api/snapshot/P01/view')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('text/html', response.content_type)
+    def test_batch_audit(self):
+        response = self.client.get('/api/batch-audit')
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertEqual(data['total'], 60)
+        self.assertIn('average_score', data)
+        self.assertEqual(len(data['records']), 60)
+    def test_custom_audit(self):
+        payload = {
+            'advertiser': 'Acme Cloud',
+            'vertical': 'SaaS',
+            'headline_1': 'Fast Cloud Hosting',
+            'headline_2': 'Free 14-Day Trial',
+            'html_content': '<html><body><h1>Fast Cloud Hosting</h1><p>Start your free 14-day trial today.</p></body></html>'
+        }
+        response = self.client.post('/api/audit-custom', json=payload)
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertEqual(data['score'], 100)
+        self.assertEqual(data['counts']['matched'], 2)
+if __name__ == '__main__': unittest.main()

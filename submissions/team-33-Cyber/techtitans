@@ -1,0 +1,239 @@
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+import streamlit as st
+from sklearn.metrics import precision_score, recall_score
+
+
+st.set_page_config(page_title="Campaign Anomaly Monitor", layout="wide")
+st.title("Campaign Anomaly Monitor")
+
+uploaded_file = st.sidebar.file_uploader("Campaign metrics CSV", type="csv")
+if uploaded_file is None:
+    st.info("Upload a campaign metrics CSV to get started.")
+    st.stop()
+
+df = pd.read_csv(uploaded_file)
+if df.empty:
+    st.error("The uploaded CSV has no rows.")
+    st.stop()
+
+columns = df.columns.tolist()
+campaign_default = columns.index("campaign_id") if "campaign_id" in columns else 0
+date_default = columns.index("date") if "date" in columns else 0
+
+st.sidebar.header("Data columns")
+campaign_col = st.sidebar.selectbox(
+    "Campaign ID", columns, index=campaign_default
+)
+date_col = st.sidebar.selectbox("Date", columns, index=date_default)
+
+metric_options = [col for col in columns if col not in {campaign_col, date_col}]
+metric_defaults = [
+    col for col in ["spend", "clicks", "conversions"] if col in metric_options
+]
+metrics = st.sidebar.multiselect(
+    "Metrics to monitor",
+    metric_options,
+    default=metric_defaults,
+)
+label_options = ["None"] + [col for col in columns if col not in {campaign_col, date_col}]
+label_col = st.sidebar.selectbox("Incident label (optional)", label_options)
+
+st.sidebar.header("Detection settings")
+window = st.sidebar.slider("History window (days)", 7, 90, 28)
+min_history = st.sidebar.slider(
+    "Minimum history points", 2, window, min(14, window)
+)
+zscore_threshold = st.sidebar.number_input(
+    "Anomaly score threshold", min_value=0.5, max_value=20.0, value=4.0, step=0.5
+)
+min_relative_change = st.sidebar.slider(
+    "Minimum relative change", 0.0, 1.0, 0.20, step=0.05
+)
+
+if not metrics:
+    st.warning("Select at least one metric to monitor.")
+    st.stop()
+
+df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
+if df[date_col].isna().any():
+    st.error("Some rows have invalid dates. Correct them in the CSV and upload it again.")
+    st.stop()
+
+for metric in metrics:
+    df[metric] = pd.to_numeric(df[metric], errors="coerce")
+
+if df.duplicated([campaign_col, date_col]).any():
+    st.error("The CSV has duplicate campaign/date rows. Resolve them before detection.")
+    st.stop()
+
+
+def detect_campaign(group):
+    group = group.sort_values(date_col).copy()
+    reasons_by_row = [[] for _ in range(len(group))]
+
+    for metric in metrics:
+        values = group[metric]
+        history = values.shift(1)
+        rolling = history.rolling(window=window, min_periods=min_history)
+
+        baseline = rolling.median()
+        mad = rolling.apply(
+            lambda values: np.median(np.abs(values - np.median(values))),
+            raw=True,
+        )
+        std = rolling.std()
+        scale = (1.4826 * mad).where(mad > 0, 0.25 * std)
+
+        difference = values - baseline
+        score = difference.abs() / scale.replace(0, np.nan)
+        relative_change = difference.abs() / baseline.abs().clip(lower=1.0)
+
+        anomalous = (
+            values.notna()
+            & baseline.notna()
+            & scale.notna()
+            & (scale > 0)
+            & (score >= zscore_threshold)
+            & (relative_change >= min_relative_change)
+        )
+
+        group[f"{metric}_baseline"] = baseline
+        group[f"{metric}_score"] = score
+        group[f"{metric}_change_pct"] = (
+            100 * difference / baseline.abs().clip(lower=1.0)
+        )
+
+        for position in np.flatnonzero(anomalous.to_numpy()):
+            direction = "increased" if values.iloc[position] > baseline.iloc[position] else "decreased"
+            change_pct = group[f"{metric}_change_pct"].iloc[position]
+            reasons_by_row[position].append(
+                f"{metric} {direction} by {abs(change_pct):.1f}% "
+                f"(baseline {baseline.iloc[position]:.2f}, "
+                f"value {values.iloc[position]:.2f}, "
+                f"score {score.iloc[position]:.2f})"
+            )
+
+    group["alert"] = [bool(reasons) for reasons in reasons_by_row]
+    group["explanation"] = [" | ".join(reasons) for reasons in reasons_by_row]
+    return group
+
+
+scored_groups = [
+    detect_campaign(group)
+    for _, group in df.groupby(campaign_col, sort=False, dropna=False)
+]
+result = (
+    pd.concat(scored_groups)
+    .sort_values([campaign_col, date_col])
+    .reset_index(drop=True)
+)
+alerts = result[result["alert"]].copy()
+
+total_rows = len(result)
+alert_count = int(result["alert"].sum())
+alert_rate = alert_count / total_rows if total_rows else 0
+
+kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+kpi1.metric("Rows analyzed", f"{total_rows:,}")
+kpi2.metric("Campaigns", f"{result[campaign_col].nunique():,}")
+kpi3.metric("Alerts", f"{alert_count:,}")
+kpi4.metric("Alert rate", f"{alert_rate:.1%}")
+
+if label_col != "None":
+    labeled = result[label_col].notna()
+    raw_labels = result.loc[labeled, label_col]
+
+    if not raw_labels.empty:
+        if pd.api.types.is_bool_dtype(raw_labels):
+            actual = raw_labels.astype(bool)
+        else:
+            actual = (
+                raw_labels.astype(str)
+                .str.strip()
+                .str.lower()
+                .isin(["1", "true", "yes", "incident"])
+            )
+
+        predicted = result.loc[labeled, "alert"]
+        score1, score2 = st.columns(2)
+        score1.metric(
+            "Precision",
+            f"{precision_score(actual, predicted, zero_division=0):.3f}",
+        )
+        score2.metric(
+            "Recall",
+            f"{recall_score(actual, predicted, zero_division=0):.3f}",
+        )
+
+st.subheader("Metric trend")
+selected_campaign = st.selectbox(
+    "Campaign",
+    result[campaign_col].dropna().unique().tolist(),
+)
+selected_metric = st.selectbox("Metric", metrics)
+
+chart_data = result[result[campaign_col] == selected_campaign].sort_values(date_col)
+fig = go.Figure()
+fig.add_trace(
+    go.Scatter(
+        x=chart_data[date_col],
+        y=chart_data[selected_metric],
+        mode="lines",
+        name=selected_metric,
+        line={"color": "#176b5b", "width": 2},
+    )
+)
+fig.add_trace(
+    go.Scatter(
+        x=chart_data[date_col],
+        y=chart_data[f"{selected_metric}_baseline"],
+        mode="lines",
+        name="Baseline",
+        line={"color": "#858b91", "dash": "dash"},
+    )
+)
+anomaly_points = chart_data[chart_data["alert"]]
+fig.add_trace(
+    go.Scatter(
+        x=anomaly_points[date_col],
+        y=anomaly_points[selected_metric],
+        mode="markers",
+        name="Alert",
+        marker={"color": "#d44c3e", "size": 9},
+    )
+)
+fig.update_layout(
+    xaxis_title="Date",
+    yaxis_title=selected_metric,
+    hovermode="x unified",
+    legend_orientation="h",
+    margin={"t": 20, "b": 20},
+)
+st.plotly_chart(fig, use_container_width=True)
+
+st.subheader("Alerts")
+if alerts.empty:
+    st.info("No alerts found with the current settings.")
+else:
+    st.dataframe(
+        alerts[[date_col, campaign_col, "explanation"]],
+        use_container_width=True,
+        hide_index=True,
+    )
+
+st.download_button(
+    "Download all scored rows",
+    result.to_csv(index=False).encode("utf-8"),
+    file_name="all_scored_metrics.csv",
+    mime="text/csv",
+)
+st.download_button(
+    "Download alerts",
+    alerts.to_csv(index=False).encode("utf-8"),
+    file_name="alerts.csv",
+    mime="text/csv",
+)

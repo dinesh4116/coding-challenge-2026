@@ -1,26 +1,23 @@
-# Virtual Environment
+# Python / IDE
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
 .venv/
 venv/
 ENV/
 env/
 
-# Node dependencies
-node_modules/
-dist/
-build/
+# Data & Output cache
+*.csv
+!data/sample_search_terms_25000.csv
+.streamlit/
 
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Environment variables
-.env
-.env.local
-
-# IDE & OS files
-.vscode/
-.idea/
+# OS / Environment
 .DS_Store
 Thumbs.db
+*.log
+.env
+*.xls
+*.xlsx
+*.xlsm
