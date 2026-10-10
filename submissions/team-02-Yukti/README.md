@@ -64,6 +64,7 @@ About & limitations; flagged records, routes and episodes export to CSV. Sidebar
 full history. The PS-04 data has no ground-truth labels, so flags are signals to
 investigate, not confirmed incidents, and evidence strength is a heuristic, not a probability.
 
+Repo link : https://github.com/keerthanagovindarajanhere-create/Adomaly
 ## Layout
 ```
 app.py              Streamlit dashboard (PS-04 dataset)
