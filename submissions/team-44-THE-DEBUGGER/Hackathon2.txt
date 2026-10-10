@@ -1,0 +1,68 @@
+MIN_CLICKS = 20
+MIN_CONVERSIONS = 3
+MAX_WASTED_COST = 50  # tune to your budget
+
+def classify_search_term(term, clicks, cost, conversions, relevance):
+    # relevance: "relevant", "unclear", or "irrelevant"
+
+    if clicks < 0 or cost < 0 or conversions < 0 or conversions > clicks:
+        return "HUMAN REVIEW", "Invalid data"
+
+    if relevance == "irrelevant":
+        return "BLOCK", "Clearly irrelevant to the business"
+
+    if clicks < MIN_CLICKS:
+        return "HUMAN REVIEW", "Insufficient click data"
+
+    if relevance != "relevant":
+        return "HUMAN REVIEW", "Relevance needs verification"
+
+    if conversions >= MIN_CONVERSIONS:
+        return "PROMOTE", "Relevant term with repeated conversions"
+
+    if conversions == 0:
+        if cost >= MAX_WASTED_COST:
+            return "BLOCK", "High spend with no conversions"
+        return "IGNORE", "No conversions observed yet"
+
+    return "HUMAN REVIEW", "Some conversions, more evidence needed"
+
+
+def read_number(prompt, cast):
+    """Keep asking until the user enters a valid number."""
+    while True:
+        try:
+            return cast(input(prompt))
+        except ValueError:
+            print("  Please enter a valid number.")
+
+
+def read_relevance():
+    while True:
+        value = input("Relevance (relevant / unclear / irrelevant): ").strip().lower()
+        if value in ("relevant", "unclear", "irrelevant"):
+            return value
+        print("  Please type exactly: relevant, unclear, or irrelevant.")
+
+
+def main():
+    while True:
+        term = input("\nSearch term (or 'q' to quit): ").strip()
+        if term.lower() == "q":
+            break
+
+        clicks = read_number("Clicks: ", int)
+        cost = read_number("Cost: ", float)
+        conversions = read_number("Conversions: ", int)
+        relevance = read_relevance()
+
+        action, reason = classify_search_term(term, clicks, cost, conversions, relevance)
+
+        print("\n--- Result ---")
+        print(f"Term   : {term}")
+        print(f"Action : {action}")
+        print(f"Reason : {reason}")
+
+
+if __name__ == "__main__":
+    main()
