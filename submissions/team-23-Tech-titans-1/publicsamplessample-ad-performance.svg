@@ -1,0 +1,9 @@
+ad_id,creative_id,platform,Amount Spent (USD),Impressions,Link Clicks,Purchases,Purchase Conversion Value
+AD-1001,CR-501,Facebook,"$1,250.00",182400,3610,142,"$6,890.50"
+AD-1002,CR-502,Instagram,980.40,201350,2875,96,4310.00
+AD-1003,CR-503,Instagram,410.00,95200,640,11,520.75
+AD-1004,CR-504,Facebook,1520.90,240100,5120,230,11980.00
+AD-1005,CR-505,Google Display,300.00,410000,820,9,365.00
+AD-1006,CR-506,TikTok,760.25,312000,4410,88,3920.40
+AD-1007,CR-507,Instagram,0,0,0,0,0
+AD-1008,CR-508,Facebook,640.00,88000,not available,21,1210.00

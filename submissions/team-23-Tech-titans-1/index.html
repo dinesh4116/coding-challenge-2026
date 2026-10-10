@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AdReach AI — AI-Powered Advertisement Creative Analysis</title>
+    <meta name="description" content="Upload ad performance datasets and advertisement images. AdReach AI analyses creatives locally in your browser and estimates reach potential." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#060b1a" />
+  </head>
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="wrap topbar-inner">
+        <a class="brand" href="#top" aria-label="AdReach AI home">
+          <img src="/favicon.svg" alt="" width="34" height="34" />
+          <span class="brand-name">AdReach<span class="brand-ai">AI</span></span>
+        </a>
+        <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav">
+          <span></span><span></span><span></span>
+        </button>
+        <nav id="nav" class="nav">
+          <a href="#dataset">Dataset</a>
+          <a href="#images">Images</a>
+          <a href="#results">Results</a>
+          <a href="#method">Method</a>
+        </nav>
+        <span class="privacy-pill" title="Files are processed on this device and are never uploaded to a server.">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Zm-1 14-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7Z"/></svg>
+          Processed in your browser
+        </span>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero wrap">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="dot"></span> Creative intelligence console</p>
+          <h1>AdReach <span class="grad">AI</span></h1>
+          <p class="subtitle">AI-Powered Advertisement Creative Analysis</p>
+          <p class="lede">
+            Upload your ad performance data, your ad creatives, or both. AdReach AI reads the actual files,
+            measures the visual properties of every image, and estimates whether each creative is likely to earn reach.
+            Where an image clearly matches a row in your dataset, its real historical metrics appear next to it.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#dataset">Upload dataset</a>
+            <a class="btn btn-ghost" href="#images">Upload images</a>
+          </div>
+        </div>
+        <ol class="hero-steps">
+          <li><span class="step-n">01</span><div><strong>Dataset</strong><p>CSV or Excel data is parsed, validated, and turned into CTR, conversion rate and ROAS where those numbers can be calculated.</p></div></li>
+          <li><span class="step-n">02</span><div><strong>Creatives</strong><p>1–200 JPG, PNG or WEBP images per batch, analysed one by one on this device.</p></div></li>
+          <li><span class="step-n">03</span><div><strong>Insights</strong><p>Score out of 100, reach estimate, explanation, suggestions and a downloadable CSV report.</p></div></li>
+        </ol>
+      </section>
+
+      <div class="wrap notice notice-info prototype-banner" role="note">
+        <strong>Transparent visual-scoring prototype.</strong>
+        Image scores come from measured visual features and documented rules (see <a href="#method">Method</a>), not from a trained
+        machine-learning model. Results estimate reach potential and do not guarantee real advertising reach.
+      </div>
+
+      <!-- ============ UPLOAD CARDS ============ -->
+      <section class="wrap upload-grid" aria-label="Uploads">
+        <!-- DATASET UPLOAD -->
+        <article id="dataset" class="card upload-card">
+          <header class="card-head">
+            <div class="card-icon card-icon-data" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h16v4H4V4Zm0 6h7v4H4v-4Zm9 0h7v4h-7v-4Zm-9 6h7v4H4v-4Zm9 0h7v4h-7v-4Z"/></svg>
+            </div>
+            <div>
+              <h2>Upload Dataset</h2>
+              <p class="muted">Ad performance data · <code>.csv</code> <code>.xlsx</code> <code>.xls</code></p>
+            </div>
+          </header>
+
+          <label id="dataset-drop" class="dropzone" for="dataset-input" tabindex="0">
+            <input id="dataset-input" type="file" accept=".csv,.xlsx,.xls,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden />
+            <svg class="dz-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm-1 7V3.5L18.5 9H13ZM8 13h8v2H8v-2Zm0 4h8v2H8v-2Z"/></svg>
+            <span class="dz-title">Drop a CSV or Excel file here</span>
+            <span class="dz-sub">or <span class="link">browse your files</span> · one file, up to 25 MB</span>
+          </label>
+
+          <div id="dataset-file" class="file-info" hidden></div>
+          <div id="dataset-messages" class="messages" aria-live="polite"></div>
+
+          <p class="hint">
+            Recognised columns include <code>ad_id</code>, <code>creative_id</code>, <code>platform</code>, <code>spend</code>,
+            <code>impressions</code>, <code>clicks</code>, <code>purchases</code>, <code>revenue</code> and common variations
+            such as “Amount Spent (USD)”, “Link Clicks” or “Conversion Value”.
+            <a href="/samples/sample-ad-performance.csv" download>Download a sample CSV</a> (illustrative values for trying the tool, not real data).
+          </p>
+        </article>
+
+        <!-- IMAGE UPLOAD -->
+        <article id="images" class="card upload-card">
+          <header class="card-head">
+            <div class="card-icon card-icon-img" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 5v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2ZM8.5 7A1.5 1.5 0 1 0 8.5 10 1.5 1.5 0 0 0 8.5 7ZM5 18h14l-4.5-6-3.5 4.5-2.5-3L5 18Z"/></svg>
+            </div>
+            <div>
+              <h2>Upload Advertisement Images</h2>
+              <p class="muted">1–200 images per batch · <code>.jpg</code> <code>.jpeg</code> <code>.png</code> <code>.webp</code></p>
+            </div>
+          </header>
+
+          <label id="image-drop" class="dropzone" for="image-input" tabindex="0">
+            <input id="image-input" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple hidden />
+            <svg class="dz-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 13v6H5v-6H3v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6h-2Zm-6-9.4V16h-2V3.6L7.4 7.2 6 5.8 12 0l6 5.8-1.4 1.4L13 3.6Z"/></svg>
+            <span class="dz-title">Drop advertisement images here</span>
+            <span class="dz-sub">or <span class="link">select multiple files</span> · up to 30 MB each</span>
+          </label>
+
+          <div class="image-bar">
+            <div class="image-count"><strong id="image-count">0</strong> / 200 images selected</div>
+            <div class="image-bar-actions">
+              <button id="analyse-btn" class="btn btn-primary btn-sm" type="button" disabled>Analyse images</button>
+              <button id="stop-btn" class="btn btn-ghost btn-sm" type="button" hidden>Stop</button>
+              <button id="clear-images-btn" class="btn btn-danger-ghost btn-sm" type="button" disabled>Clear all</button>
+            </div>
+          </div>
+          <div id="image-messages" class="messages" aria-live="polite"></div>
+          <p class="hint">
+            Images are previewed below in the results gallery before you analyse them. To link an image to a dataset row, name the file
+            after its ad ID or creative ID (for example <code>AD-1001.jpg</code>), or include a filename column in your dataset.
+          </p>
+        </article>
+      </section>
+
+      <!-- ============ DATASET RESULTS ============ -->
+      <section id="dataset-panel" class="wrap card dataset-panel" hidden aria-label="Dataset analysis">
+        <header class="section-head">
+          <div>
+            <h2>Dataset overview</h2>
+            <p class="muted" id="dataset-panel-sub"></p>
+          </div>
+        </header>
+        <div id="dataset-columns" class="columns-wrap"></div>
+        <div id="dataset-kpis" class="kpi-grid"></div>
+        <div id="dataset-metric-notes" class="messages"></div>
+        <div class="table-head">
+          <h3>Data preview</h3>
+          <span class="muted small" id="dataset-preview-note"></span>
+        </div>
+        <div class="table-scroll" tabindex="0">
+          <table id="dataset-table" class="data-table"></table>
+        </div>
+      </section>
+
+      <!-- ============ RESULTS DASHBOARD ============ -->
+      <section id="results" class="wrap results" aria-label="Bulk analysis dashboard">
+        <header class="section-head">
+          <div>
+            <h2>Bulk analysis dashboard</h2>
+            <p class="muted">Every image is analysed individually. Scores are estimates of visual reach potential.</p>
+          </div>
+          <button id="download-report-btn" class="btn btn-primary" type="button" disabled>
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 16 7 11l1.4-1.4 2.6 2.6V4h2v8.2l2.6-2.6L17 11l-5 5Zm-7 4v-2h14v2H5Z"/></svg>
+            Download CSV report
+          </button>
+        </header>
+
+        <div class="stats-grid" id="stats">
+          <div class="stat"><span class="stat-label">Total uploaded</span><span class="stat-value" data-stat="total">0</span></div>
+          <div class="stat"><span class="stat-label">Analysed successfully</span><span class="stat-value" data-stat="done">0</span></div>
+          <div class="stat stat-good"><span class="stat-label">Likely to Get Reach</span><span class="stat-value" data-stat="likely">0</span></div>
+          <div class="stat stat-warn"><span class="stat-label">Less Likely to Get Reach</span><span class="stat-value" data-stat="less">0</span></div>
+          <div class="stat stat-bad"><span class="stat-label">Failed</span><span class="stat-value" data-stat="error">0</span></div>
+          <div class="stat"><span class="stat-label">Matched to dataset</span><span class="stat-value" data-stat="matched">—</span></div>
+        </div>
+
+        <div class="progress-block">
+          <div class="progress-meta">
+            <span id="progress-label">No analysis running</span>
+            <span id="progress-pct" class="mono">0%</span>
+          </div>
+          <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="progress-label">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <label class="search">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="m21 19.6-5.3-5.3a7 7 0 1 0-1.4 1.4l5.3 5.3 1.4-1.4ZM5 10a5 5 0 1 1 10 0 5 5 0 0 1-10 0Z"/></svg>
+            <input id="search-input" type="search" placeholder="Search filename or ad ID" aria-label="Search by filename or ad ID" />
+          </label>
+          <div class="seg" role="group" aria-label="Filter by result">
+            <button type="button" class="seg-btn active" data-filter="all">All</button>
+            <button type="button" class="seg-btn" data-filter="likely">Likely</button>
+            <button type="button" class="seg-btn" data-filter="less">Less likely</button>
+            <button type="button" class="seg-btn" data-filter="pending">Not analysed</button>
+            <button type="button" class="seg-btn" data-filter="error">Errors</button>
+            <button type="button" class="seg-btn" data-filter="matched">Matched</button>
+          </div>
+          <label class="select">
+            <span class="sr-only">Sort</span>
+            <select id="sort-select" aria-label="Sort images">
+              <option value="upload">Upload order</option>
+              <option value="score-desc">Score: high to low</option>
+              <option value="score-asc">Score: low to high</option>
+              <option value="name">Filename A–Z</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="gallery" class="gallery" aria-live="polite"></div>
+        <div id="gallery-empty" class="empty">
+          <div class="empty-art" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <p><strong>No images yet.</strong> Add advertisement images in the <a href="#images">image upload</a> section to preview and analyse them here.</p>
+        </div>
+      </section>
+
+      <!-- ============ METHOD ============ -->
+      <section id="method" class="wrap card method">
+        <header class="section-head">
+          <div>
+            <h2>How the analysis works</h2>
+            <p class="muted">A transparent, rule-based visual-scoring prototype. It is not a trained ML model, and every point it awards can be traced to a rule below.</p>
+          </div>
+        </header>
+        <div class="method-grid">
+          <div>
+            <h3>Measured image features</h3>
+            <p>Each image is decoded in your browser, drawn to a canvas (downscaled to at most 512&nbsp;px on its longest side for consistent measurement) and analysed pixel by pixel:</p>
+            <ul class="ticks">
+              <li><strong>Dimensions &amp; aspect ratio</strong>: original pixel size, compared with standard placements (1:1, 4:5, 9:16, 16:9, 1.91:1, 2:3).</li>
+              <li><strong>Brightness</strong>: mean relative luminance.</li>
+              <li><strong>Contrast</strong>: standard deviation of luminance (RMS contrast).</li>
+              <li><strong>Colourfulness</strong>: the Hasler &amp; Süsstrunk colourfulness metric, plus mean saturation.</li>
+              <li><strong>Dominant colours &amp; distribution</strong>: colour quantisation into clusters and a 12-bin hue histogram.</li>
+              <li><strong>Clarity</strong>: variance of the Laplacian (a standard sharpness measure).</li>
+              <li><strong>Visual complexity</strong>: share of strong Sobel edges.</li>
+              <li><strong>Text-like detail (approximate)</strong>: share of small blocks with dense stroke-like transitions. It cannot tell text from other fine patterns, so it informs suggestions only and is <em>not</em> part of the score.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Scoring rules (100 points)</h3>
+            <table class="weights">
+              <thead><tr><th>Factor</th><th>Points</th><th>Full marks when…</th></tr></thead>
+              <tbody>
+                <tr><td>Contrast</td><td class="mono">20</td><td>Luminance std. dev. 20–36%</td></tr>
+                <tr><td>Resolution</td><td class="mono">15</td><td>Shortest side ≥ 1080 px</td></tr>
+                <tr><td>Brightness</td><td class="mono">15</td><td>Mean brightness 35–72%</td></tr>
+                <tr><td>Colourfulness</td><td class="mono">15</td><td>Colourfulness 30–95</td></tr>
+                <tr><td>Clarity</td><td class="mono">15</td><td>Laplacian variance ≥ 250</td></tr>
+                <tr><td>Format fit</td><td class="mono">10</td><td>Within 2% of a standard ad ratio</td></tr>
+                <tr><td>Visual balance</td><td class="mono">10</td><td>Edge density 3–16%</td></tr>
+              </tbody>
+            </table>
+            <p>A score of <strong>65 or more</strong> gives “Likely to Get Reach”. A lower score gives “Less Likely to Get Reach”.
+              The thresholds are design heuristics drawn from common creative best practice. They were not fitted to outcome data.</p>
+            <h3>Dataset matching</h3>
+            <p>An image is linked to dataset rows only on an exact, case-insensitive match: the filename (without extension) must equal a value in a filename column,
+              an ad ID (optionally prefixed <code>ad_</code>/<code>ad-</code>), or a creative ID. If the name matches two different records, no match is made.
+              Images without a match are still analysed on their own.</p>
+          </div>
+        </div>
+        <div class="notice notice-warn">
+          <strong>Limitations.</strong> The tool doesn't read the ad's message, offer, audience, targeting, budget, brand or platform algorithm,
+          and all of these strongly affect real reach. It reports no confidence percentages, accuracy figures or predicted reach numbers,
+          because no model has been validated to produce them. Use the scores to compare creatives and decide what to A/B test.
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer wrap">
+      <span>AdReach AI · AI-Powered Advertisement Creative Analysis</span>
+      <span class="muted">All files are processed locally in your browser. Nothing is uploaded.</span>
+    </footer>
+
+    <dialog id="detail-dialog" class="dialog" aria-labelledby="detail-title">
+      <div class="dialog-inner" id="detail-body"></div>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
