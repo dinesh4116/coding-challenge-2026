@@ -1,0 +1,32 @@
+CAMPAIGNGUARD AI — REQUIREMENTS / RUN COMMANDS
+================================================
+
+Prerequisite:
+- Install Node.js LTS (npm is included).
+
+Run these commands from the CampaignGuard_AI project root
+(the folder containing package.json and package-lock.json):
+
+1. Install dependencies:
+   npm ci
+
+2. Start the development server:
+   npm run dev
+
+3. Open the local URL printed in the terminal
+   (Vite commonly uses http://localhost:5173).
+
+Optional commands:
+
+4. Run tests, if the project defines a test script:
+   npm test -- --run
+
+5. Create a production build:
+   npm run build
+
+Important:
+- Keep package.json and package-lock.json in the submission.
+- Do not include node_modules. Judges can recreate it by running npm ci.
+- Run commands from the project root.
+- If an optional command reports "Missing script", check the scripts section
+  of package.json and use only commands defined there.
