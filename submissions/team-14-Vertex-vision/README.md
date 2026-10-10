@@ -1,5 +1,5 @@
 # 🎯 TriageIQ — Evidence-First Search Intelligence (PS-01)
-
+PUBLIC URL LINK :  https://admirable-sawine-ad4590.netlify.app/
 > **Audited, Contract-Compliant Search Term Triage Engine & Review Dashboard**  
 > Built for Google Ads Search Term Reports with Wilson Confidence Intervals, Empirical Bayes Shrinkage, Intent Clustering, and Human-in-the-Loop Review.
 
