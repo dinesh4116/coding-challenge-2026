@@ -1,0 +1,9 @@
+streamlit>=1.43
+requests
+beautifulsoup4
+pandas
+python-dateutil
+ddgs
+Pillow
+# optional, only for "Read text from image":
+# pytesseract
