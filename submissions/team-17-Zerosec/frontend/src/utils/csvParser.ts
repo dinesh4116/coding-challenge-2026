@@ -8,8 +8,8 @@ const COMMON_HEADER_ALIASES: Record<keyof ColumnMapping, string[]> = {
   conversionsField: ['conversions', 'conv', 'conversions_count', 'orders', 'leads', 'events', 'total_conversions'],
   impressionsField: ['impressions', 'impr', 'views', 'total_impressions'],
   clicksField: ['clicks', 'link_clicks', 'total_clicks'],
-  isIncidentField: ['is_incident', 'is_anomaly', 'ground_truth', 'actual_anomaly', 'label', 'target', 'has_incident'],
-  incidentTypeField: ['incident_type', 'anomaly_type', 'incident_category', 'reason', 'label_type', 'type']
+  isIncidentField: ['is_incident', 'critical_warning', 'is_anomaly', 'ground_truth', 'actual_anomaly', 'label', 'target', 'has_incident'],
+  incidentTypeField: ['incident_type', 'ground_truth_label', 'anomaly_type', 'incident_category', 'reason', 'label_type', 'type']
 };
 
 /**
@@ -94,7 +94,8 @@ export function transformRawRowsToRecords(
     let is_incident: boolean | undefined = undefined;
     if (mapping.isIncidentField && row[mapping.isIncidentField] !== undefined && row[mapping.isIncidentField] !== '') {
       const val = row[mapping.isIncidentField];
-      is_incident = val === true || val === 'true' || val === 1 || val === '1' || String(val).toLowerCase() === 'yes';
+      const s = String(val).trim().toLowerCase();
+      is_incident = val === true || val === 1 || s === 'true' || s === '1' || s === 'yes' || s === 'critical' || (s !== 'false' && s !== '0' && s !== 'no' && s !== 'normal' && s !== 'none');
     }
 
     const incident_type = mapping.incidentTypeField ? String(row[mapping.incidentTypeField] || '') : undefined;

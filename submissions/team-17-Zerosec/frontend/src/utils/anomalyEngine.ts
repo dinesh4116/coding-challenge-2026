@@ -50,6 +50,8 @@ export function detectAnomalies(
 
   // Cooldown tracker per campaign: campaign -> lastAlertDate
   const lastAlertDateMap: Record<string, string> = {};
+  let suppressedAlertsCount = 0;
+  let seasonalFilteredCount = 0;
 
   Object.entries(recordsByCampaign).forEach(([campaign, cmpRecords]) => {
     // Ensure chronological order
@@ -83,6 +85,7 @@ export function detectAnomalies(
       if (config.suppressConsecutiveAlerts && lastAlert) {
         const daysDiff = (new Date(current.date).getTime() - new Date(lastAlert).getTime()) / (1000 * 3600 * 24);
         if (daysDiff < config.cooldownPeriodDays) {
+          suppressedAlertsCount++;
           continue; // Suppress duplicate sustained alert to reduce fatigue
         }
       }
@@ -182,6 +185,7 @@ export function detectAnomalies(
       ) {
         // Suppress alert or classify as low severity seasonal shift to prevent alert fatigue!
         detectedCategory = 'seasonal_shift';
+        seasonalFilteredCount++;
         targetMetric = 'Spend';
         observedVal = current.spend;
         expectedVal = expectedSpend;
@@ -274,7 +278,9 @@ export function detectAnomalies(
     recall: recall !== null ? Number((recall * 100).toFixed(1)) : null,
     falsePositiveRate: falsePositiveRate !== null ? Number((falsePositiveRate * 100).toFixed(1)) : null,
     f1Score: f1Score !== null ? Number((f1Score * 100).toFixed(1)) : null,
-    hasGroundTruth
+    hasGroundTruth,
+    suppressedAlerts: suppressedAlertsCount,
+    groupedAlerts: seasonalFilteredCount
   };
 
   return { alerts: alerts.sort((a, b) => b.date.localeCompare(a.date)), metrics };

@@ -19,7 +19,7 @@ import pandas as pd
 
 VOLUME_METRICS = ("impressions", "clicks", "spend", "conversions", "revenue")
 COUNT_METRICS = ("impressions", "clicks", "conversions")
-SEVERITY_RANK = {"medium": 1, "high": 2, "critical": 3}
+SEVERITY_RANK = {"low": 0, "medium": 1, "high": 2, "critical": 3}
 MAD_TO_SIGMA = 1.4826  # makes MAD comparable to a standard deviation for normal data
 MAD_EFFICIENCY = 0.37      # MAD uses ~37% of the information a std-dev would (normal data)
 MAJOR_VOLUME_CHANGE = 0.5  # a volume metric dropping >= 50% is at least "high"
@@ -179,8 +179,13 @@ def _score_against(values: pd.Series, history_source: pd.Series, metric: str,
 def classify_severity(score: float, pct_change: float, metric: str, cfg: DetectorConfig) -> str:
     if abs(score) >= cfg.critical_z:
         return "critical"
-    if metric in VOLUME_METRICS and pct_change <= -0.90:
-        return "critical"  # a volume metric collapsing toward zero
+    # Severe delivery collapse on spend, impressions, or clicks is critical (e.g. budget exhaustion)
+    if metric in ("spend", "impressions", "clicks") and pct_change <= -0.90:
+        return "critical"
+    # Volume metrics collapsing by >= 90% are only critical if statistically extreme (high_z),
+    # preventing low-volume zero-conversion variance from firing false critical alarms
+    if metric in VOLUME_METRICS and pct_change <= -0.90 and abs(score) >= cfg.high_z:
+        return "critical"
     if abs(score) >= cfg.high_z:
         return "high"
     if metric in VOLUME_METRICS and pct_change <= -MAJOR_VOLUME_CHANGE:  # breakages show up as drops
@@ -193,6 +198,7 @@ def detect(frame: pd.DataFrame, metrics: list[str], cfg: DetectorConfig) -> Dete
     anomalies: list[Anomaly] = []
     for campaign_id, rows in frame.groupby("campaign_id", sort=True):
         rows = rows.sort_values("date")
+        med_conv = rows["conversions"].median() if "conversions" in rows.columns else 999.0
         for metric in metrics:
             observed = rows[metric].astype(float)
             s = score_series(observed, metric, cfg)
@@ -201,6 +207,12 @@ def detect(frame: pd.DataFrame, metrics: list[str], cfg: DetectorConfig) -> Dete
             s.insert(0, "date", rows["date"])
             s.insert(0, "campaign_id", campaign_id)
             s["is_anomaly"] = is_flagged(s, observed, cfg)
+            # Low-volume revenue guard: If a campaign averages <= 2 conversions/day,
+            # an occasional day with 0 conversions and 0 revenue is normal Poisson noise,
+            # not an actionable revenue anomaly.
+            if metric == "revenue":
+                zero_revenue = (observed == 0) & (med_conv <= 2)
+                s.loc[zero_revenue, "is_anomaly"] = False
             score_parts.append(s)
             for r in s[s["is_anomaly"]].itertuples(index=False):
                 anomalies.append(Anomaly(

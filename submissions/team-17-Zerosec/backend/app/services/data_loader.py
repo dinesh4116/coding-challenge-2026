@@ -29,9 +29,13 @@ COLUMN_ALIASES: dict[str, str] = {
     "purchase_value": "revenue", "sales": "revenue",
     "is_incident": "is_incident", "is_anomaly": "is_incident", "anomaly": "is_incident",
     "label": "is_incident", "incident": "is_incident",
+    "critical_warning": "is_incident",
     "incident_type": "incident_type", "anomaly_type": "incident_type",
+    "ground_truth_label": "incident_type",
+    "alert_severity": "alert_severity",
+    "incident_id": "incident_id",
 }
-TRUE_LABELS = {"1", "1.0", "true", "yes", "y", "t"}
+TRUE_LABELS = {"1", "1.0", "true", "yes", "y", "t", "critical"}
 
 
 class DataValidationError(ValueError):
@@ -70,9 +74,16 @@ def normalize_frame(raw: pd.DataFrame) -> LoadResult:
         warnings.append("Detected decimal comma number format (e.g. 1.234,50); ',' read as the decimal point.")
     for m in metrics:
         df[m] = _parse_numeric(df[m], m, warnings, decimal_comma)
-    has_labels = "is_incident" in df.columns
-    if has_labels:
+    if "is_incident" in df.columns:
+        has_labels = True
         df["is_incident"] = df["is_incident"].astype(str).str.strip().str.lower().isin(TRUE_LABELS).astype(int)
+    elif "incident_type" in df.columns:
+        non_incident_labels = {"normal", "none", "", "nan", "0", "false"}
+        df["is_incident"] = (~df["incident_type"].astype(str).str.strip().str.lower().isin(non_incident_labels)).astype(int)
+        has_labels = bool(df["is_incident"].any())
+    else:
+        has_labels = False
+
     if "incident_type" in df.columns:
         df["incident_type"] = df["incident_type"].fillna("").astype(str).str.strip()
 
@@ -159,17 +170,28 @@ def _to_dates(raw: pd.Series, warnings: list[str]) -> pd.Series:
     (a daily report for "2026-01-02 +05:00" belongs to 2 January).
     """
     def local_date(value, **kw):
-        ts = pd.to_datetime(value, errors="coerce", **kw)
-        return pd.NaT if pd.isna(ts) else ts.tz_localize(None) if ts.tzinfo else ts
+        if pd.isna(value) or value is None:
+            return pd.NaT
+        try:
+            ts = pd.to_datetime(value, errors="coerce", **kw)
+            if pd.isna(ts):
+                return pd.NaT
+            if hasattr(ts, "tzinfo") and ts.tzinfo is not None:
+                return ts.tz_localize(None)
+            return ts
+        except Exception:
+            return pd.NaT
 
     def parse(**kw) -> pd.Series:
         try:
             d = pd.to_datetime(raw, errors="coerce", **kw)
-        except ValueError:  # mixed timezone offsets in one column: parse value by value
-            d = pd.to_datetime(raw.map(lambda v: local_date(v, **kw)))
-        if d.dt.tz is not None:
-            d = d.dt.tz_localize(None)
-        return d.dt.normalize()
+        except (ValueError, TypeError):  # mixed timezone offsets or types in one column: parse value by value
+            d = pd.to_datetime(raw.map(lambda v: local_date(v, **kw)), errors="coerce")
+        if hasattr(d, "dt"):
+            if getattr(d.dt, "tz", None) is not None:
+                d = d.dt.tz_localize(None)
+            return d.dt.normalize()
+        return pd.to_datetime(raw.map(lambda v: local_date(v, **kw)), errors="coerce").dt.normalize()
 
     dates = parse(format="ISO8601")
     if dates.isna().mean() <= 0.5:

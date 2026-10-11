@@ -100,3 +100,56 @@ def test_infinite_values_are_missing():
 def test_mixed_timezones_do_not_crash():
     r = load("campaign_id,date,spend\nA,2026-01-01T00:00:00+00:00,1\nA,2026-01-02T00:00:00+05:00,2\n")
     assert r.valid_rows == 2
+
+
+def test_mixed_aware_and_naive_timezones():
+    csv_text = (
+        "campaign_id,date,spend\n"
+        "A,2026-01-01T00:00:00+00:00,10\n"
+        "A,2026-01-02 00:00:00,20\n"
+        "A,2026-01-03T12:00:00Z,30\n"
+        "A,2026-01-04T05:00:00-05:00,40\n"
+    )
+    r = load(csv_text)
+    assert r.valid_rows == 4
+    dates = list(r.frame["date"])
+    assert dates == [
+        pd.Timestamp("2026-01-01"),
+        pd.Timestamp("2026-01-02"),
+        pd.Timestamp("2026-01-03"),
+        pd.Timestamp("2026-01-04"),
+    ]
+
+
+def test_mixed_offsets_and_formats():
+    csv_text = (
+        "campaign_id,date,spend\n"
+        "B,2026-02-01T23:00:00+05:30,10\n"
+        "B,2026-02-02T01:00:00-08:00,20\n"
+        "B,2026-02-03,30\n"
+    )
+    r = load(csv_text)
+    assert r.valid_rows == 3
+    dates = list(r.frame["date"])
+    assert dates == [
+        pd.Timestamp("2026-02-01"),
+        pd.Timestamp("2026-02-02"),
+        pd.Timestamp("2026-02-03"),
+    ]
+
+
+def test_invalid_and_missing_dates_safely_handled():
+    csv_text = (
+        "campaign_id,date,spend\n"
+        "C,2026-03-01T00:00:00Z,10\n"
+        "C,,20\n"
+        "C,bad_timestamp,30\n"
+        "C,2026-03-02,40\n"
+    )
+    r = load(csv_text)
+    assert r.valid_rows == 2
+    assert list(r.frame["date"]) == [
+        pd.Timestamp("2026-03-01"),
+        pd.Timestamp("2026-03-02"),
+    ]
+

@@ -110,7 +110,7 @@ python -m app.cli data\demo_campaigns.csv
   cd backend
   python -m pytest -v
   ```
-  **Result:** `91 passed, 1 skipped` (100% green unit test coverage).
+  **Result:** `96 passed, 0 skipped` (100% green unit test coverage).
 - **Frontend Production Build:**
   ```powershell
   cd frontend

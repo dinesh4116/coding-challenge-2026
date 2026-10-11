@@ -98,43 +98,46 @@ def create_presentation():
     # ==========================================
     # SLIDE 3: Proposed Solution
     # ==========================================
+    # ==========================================
+    # SLIDE 3: Proposed Solution
+    # ==========================================
     s3 = prs.slides[2]
     s3_items = [
-        "- Summary: An autonomous anomaly intelligence engine that derives per-campaign volatility bands (mu +- 2*sigma) to catch 100% of incidents while suppressing >97% of noise.",
-        "- Dynamic Volatility Modeling: Calculates 14-day rolling baselines per campaign rather than using an arbitrary, rigid global percentage threshold.",
+        "- Summary: An autonomous anomaly intelligence engine that derives per-campaign volatility bands (rolling median / MAD & Poisson tails) to catch real incidents while achieving 94.2% noise reduction vs naive thresholds.",
+        "- Dynamic Volatility Modeling: Calculates 28-day rolling baselines per campaign rather than using an arbitrary, rigid global percentage threshold.",
         "- Intelligent Triaging: Separates true broken incidents from natural seasonal shifts, routing them to Immediate vs. Digest notification tiers.",
-        "- Cooldown Suppression: Automatically groups multi-day sustained anomalies to prevent repetitive duplicate notification spam.",
-        "- Automated Diagnosis: Every alert includes a plain-English explanation and a step-by-step diagnostic playbook for rapid engineering resolution."
+        "- Cooldown Suppression Shield: Automatically groups multi-day sustained anomalies and suppresses redundant alerts inside cooldown windows.",
+        "- Automated Diagnosis: Every alert includes a plain-English explanation, measured evidence, and an actionable diagnostic playbook."
     ]
     format_content_card(s3.shapes[2], s3_items, "ZeroSec: Time-Series Anomaly Intelligence")
-    format_callout_box(s3.shapes[5], "Flow: 180-Day Metrics Ingestion -> Dynamic Baselines (mu +- 2*sigma) & Cooldown -> Actionable Alerts + Playbooks")
+    format_callout_box(s3.shapes[5], "Flow: 180-Day Ingestion -> Rolling Median/MAD & Poisson Baselines -> Grouping & Cooldown -> Actionable Alerts")
 
     # ==========================================
     # SLIDE 4: Technology Stack & Implementation
     # ==========================================
     s4 = prs.slides[3]
     s4_items = [
-        "- Frontend: React 18, Vite, TypeScript, Tailwind CSS, Lucide Icons, Recharts (Composed time-series, confidence envelopes & confusion matrix).",
-        "- Backend & API: Python 3.10+, FastAPI REST microservice (/analyze, /demo-data, /health), Uvicorn, Pytest (91 unit tests passing, 100% green).",
-        "- Statistical Core: Rolling mean (mu) & standard deviation (sigma), dynamic Z-Score outlier detection, and spend-floor safety guardrails (Rs 250 floor).",
-        "- Step-by-Step Delivery: Statistical engine validated with 91 tests -> FastAPI microservice built -> Interactive React dashboard built -> 1-click Markdown RCA export."
+        "- Frontend: React 18, Vite, TypeScript, Tailwind CSS, Lucide Icons, Recharts (Composed time-series, confidence envelopes & evaluation matrix).",
+        "- Backend & API: Python 3.10+, FastAPI REST microservice (/analyze, /demo-data, /health), Uvicorn, Pytest (96 unit tests passing, 100% green).",
+        "- Statistical Core: Rolling median & MAD with Student-t small-sample correction for continuous metrics, exact Poisson tail for counts, and low-volume guards.",
+        "- Step-by-Step Delivery: Statistical engine validated with 96 tests -> FastAPI microservice built -> Interactive React dashboard built -> 1-click Markdown RCA export."
     ]
     format_content_card(s4.shapes[2], s4_items, "Full-Stack Production-Ready Architecture")
-    format_callout_box(s4.shapes[5], "Tech Stack: React 18 + Vite | Python FastAPI Microservice | 91 Passing Pytest Unit Tests")
+    format_callout_box(s4.shapes[5], "Tech Stack: React 18 + Vite | Python FastAPI Microservice | 96 Passing Pytest Unit Tests")
 
     # ==========================================
     # SLIDE 5: Impact & Benefits
     # ==========================================
     s5 = prs.slides[4]
     s5_items = [
-        "- 100.0% Incident Recall: Successfully detected 4 out of 4 ground-truth incident windows (0 missed real emergencies across 180 days).",
-        "- >97% Noise Reduction: Replaced 1,103 false alerts from naive rules with only 5 actionable emergency incidents and quiet background digests.",
-        "- <0.7% False Alarm Rate: Across 3,571 normal operating campaign-days, normal days stay quiet without crying wolf.",
-        "- 85% Faster Triage: Automated diagnostic playbooks eliminate 2-3 hours of manual metric auditing and data scraping per incident.",
-        "- Direct Revenue Protection: Catches zero-conversion tag drops and runaway CPC spikes before they drain campaign budgets."
+        "- 100% Immediate Alert Precision: 4 out of 4 immediate incident alerts matched real emergencies on Day 0 (zero false emergency pages).",
+        "- 94.2% Alert Reduction vs Naive Baseline: Replaced 1,103 noisy alerts from naive ±30% rules with 64 managed notifications (4 immediate, 60 digest).",
+        "- 178 Multi-Metric Anomalies Grouped: Correlated anomalies across spend, clicks, and conversions merged into cohesive campaign incident episodes.",
+        "- 95 Repetitive Findings Suppressed: Cooldown shield prevents fatigue by suppressing recurring notifications while an outage is already acknowledged.",
+        "- Automated Diagnostic Playbooks: Root cause hypotheses and step-by-step diagnostic checklists generated for every incident to streamline triage."
     ]
-    format_content_card(s5.shapes[2], s5_items, "Measurable Gains & Ground-Truth Accuracy")
-    format_callout_box(s5.shapes[5], "Measurable Impact: 100% Recall (0 Missed Incidents) with >97% Noise Reduction vs Naive Rules")
+    format_content_card(s5.shapes[2], s5_items, "Measurable Empirical Benchmarks (Synthetic 180-Day Dataset)")
+    format_callout_box(s5.shapes[5], "Empirical Impact: 94.2% Alert Reduction vs Naive Rules (64 Managed Alerts vs 1,103 Naive Fired)")
 
     # ==========================================
     # SLIDE 6: Prototype, Feasibility & Future Scope
@@ -164,21 +167,29 @@ def create_presentation():
     s7 = prs.slides[6]
     s7_items = [
         "- Problem Solved: Replaced broken, noisy static rules with intelligent, per-campaign dynamic baselines that protect ad budgets without alert fatigue.",
-        "- Transparent Accuracy: Ground-truth 4-cell confusion matrix reporting 100% Recall, 0 missed emergencies, and <0.7% false alarm rate.",
-        "- Complete Submission: Full-stack implementation, 91 passing tests, complete documentation, and PDF functional report.",
+        "- Transparent Accuracy: 94.2% alert noise reduction, 100% immediate alert precision, and transparently reported false-positive benchmarks.",
+        "- Complete Submission: Full-stack implementation, 96 passing tests, complete documentation, and PDF functional report.",
         "- Thank You: We welcome your questions and look forward to demonstrating the live prototype!"
     ]
     format_content_card(s7.shapes[2], s7_items, "Summary & Key Takeaways")
     format_callout_box(s7.shapes[5], '"ZeroSec: Silence the noise, catch every emergency."')
 
-    # Save presentations
-    prs.save(output_path)
-    print(f"Presentation saved successfully to: {output_path}")
+    # Save presentations with fallback if original is open
+    try:
+        prs.save(output_path)
+        print(f"Presentation saved successfully to: {output_path}")
+    except PermissionError:
+        alt_path = output_path.replace(".pptx", "_Updated.pptx")
+        prs.save(alt_path)
+        print(f"Original PPTX locked by another program. Saved to: {alt_path}")
 
-    # Also save to coding-challenge submission directory
+    # Also save to coding-challenge submission directory if exists
     if os.path.exists(os.path.dirname(submission_path)):
-        prs.save(submission_path)
-        print(f"Presentation synced to submission repo: {submission_path}")
+        try:
+            prs.save(submission_path)
+            print(f"Presentation synced to submission repo: {submission_path}")
+        except PermissionError:
+            pass
 
 if __name__ == '__main__':
     create_presentation()

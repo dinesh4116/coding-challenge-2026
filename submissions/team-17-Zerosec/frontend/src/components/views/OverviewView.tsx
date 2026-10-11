@@ -74,7 +74,13 @@ export const OverviewView: React.FC = () => {
   const totalSpend = records.reduce((acc, r) => acc + r.spend, 0);
   const totalConversions = records.reduce((acc, r) => acc + r.conversions, 0);
   const totalCampaigns = campaignSummaries.length;
+  const totalAlertsCount = alerts.length;
   const actionableAlertsCount = criticalCount + highCount;
+  const informationalAlertsCount = mediumCount + lowCount;
+
+  // Real noise shield values from backend analysis or client engine
+  const suppressedCount = backendSummary?.suppressed_alerts ?? metrics?.suppressedAlerts ?? 0;
+  const groupedCount = backendSummary?.grouped_alerts ?? metrics?.groupedAlerts ?? 0;
 
   return (
     <div className="space-y-5">
@@ -103,15 +109,15 @@ export const OverviewView: React.FC = () => {
           </p>
         </div>
 
-        {/* Actionable Incidents */}
+        {/* Actionable Alerts (Critical + High) */}
         <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm">
           <div className="flex items-center justify-between text-slate-500 mb-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Incidents</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Actionable Alerts</span>
             <AlertTriangle className="w-4 h-4 text-rose-500" />
           </div>
           <p className="text-xl font-bold text-rose-600 tracking-tight">{actionableAlertsCount}</p>
           <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
-            {criticalCount} Crit • {highCount} High
+            {criticalCount} Crit • {highCount} High (of {totalAlertsCount})
           </p>
         </div>
 
@@ -140,15 +146,17 @@ export const OverviewView: React.FC = () => {
         </div>
 
         {/* Noise Suppression */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm">
+        <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm" title="Anomalies suppressed by cooldown or grouped across correlated metrics to prevent notification fatigue">
           <div className="flex items-center justify-between text-slate-500 mb-1.5">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Noise Shield</span>
             <ShieldCheck className="w-4 h-4 text-purple-500" />
           </div>
           <p className="text-xl font-bold text-purple-600 tracking-tight">
-            {backendSummary?.suppressed_alerts ? `${backendSummary.suppressed_alerts}` : '95'}
+            {suppressedCount}
           </p>
-          <p className="text-[11px] text-slate-500 mt-0.5">Noise Filtered</p>
+          <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
+            {groupedCount > 0 ? `${suppressedCount} Cooldown • ${groupedCount} Grouped` : 'Cooldown Filtered'}
+          </p>
         </div>
       </div>
 
@@ -196,7 +204,9 @@ export const OverviewView: React.FC = () => {
               <h3 className="font-bold text-slate-900 text-sm">Severity Breakdown</h3>
               <BarChart3 className="w-4 h-4 text-slate-400" />
             </div>
-            <p className="text-[11px] text-slate-500 mb-3">Actionable risk priority</p>
+            <p className="text-[11px] text-slate-500 mb-3">
+              {actionableAlertsCount} Actionable (Crit + High) • {informationalAlertsCount} Digest
+            </p>
 
             <div className="h-44 w-full relative flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
@@ -219,9 +229,10 @@ export const OverviewView: React.FC = () => {
                   />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-xl font-bold text-slate-900">{actionableAlertsCount}</span>
-                <span className="text-[9px] uppercase font-semibold text-slate-400">Actionable</span>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                <span className="text-xl font-bold text-slate-900 leading-none">{actionableAlertsCount}</span>
+                <span className="text-[9px] uppercase font-bold text-rose-600 tracking-wider mt-1">Actionable</span>
+                <span className="text-[9px] text-slate-400 font-medium">of {totalAlertsCount} Total</span>
               </div>
             </div>
           </div>

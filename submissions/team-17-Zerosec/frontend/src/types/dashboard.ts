@@ -81,6 +81,8 @@ export interface ModelMetrics {
   falsePositiveRate: number | null;
   f1Score: number | null;
   hasGroundTruth: boolean;
+  suppressedAlerts?: number;
+  groupedAlerts?: number;
 }
 
 export interface DetectionConfig {

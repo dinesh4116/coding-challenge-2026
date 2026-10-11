@@ -129,3 +129,31 @@ def test_campaign_collapse_on_portfolio_down_day_stays_incident():
     findings, _ = build_findings(det([collapse], extra), cfg)
     [f] = findings
     assert f.category == "incident"
+
+
+def test_dashboard_metric_invariants_and_actionable_population():
+    # Build simulated alerts across all severity tiers
+    anoms = [
+        A("C1", 0, "spend", 10.0, severity="critical"),
+        A("C2", 0, "conversions", -5.0, severity="high"),
+        A("C3", 0, "cpa", 4.0, severity="medium"),
+        A("C4", 0, "clicks", 3.0, severity="low"),
+    ]
+    findings, _ = build_findings(det(anoms), cfg)
+    alerts = manage_alerts(findings, cfg)
+    severities = [a.severity for a in alerts]
+    
+    crit_count = severities.count("critical")
+    high_count = severities.count("high")
+    med_count = severities.count("medium")
+    low_count = severities.count("low")
+    
+    actionable_count = crit_count + high_count
+    digest_count = med_count + low_count
+    total_count = len(alerts)
+    
+    # Invariant: Actionable + Digest equals total alerts, donut slices sum exactly to total
+    assert actionable_count + digest_count == total_count
+    assert crit_count + high_count + med_count + low_count == total_count
+    assert actionable_count == 2
+    assert total_count == 4

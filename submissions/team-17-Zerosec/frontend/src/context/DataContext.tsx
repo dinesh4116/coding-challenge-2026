@@ -59,8 +59,8 @@ interface DataContextType {
 }
 
 const defaultConfig: DetectionConfig = {
-  baselineWindow: 14,
-  zScoreThreshold: 2.5,
+  baselineWindow: 28,
+  zScoreThreshold: 3.5,
   minSpendThreshold: 50,
   suppressConsecutiveAlerts: true,
   cooldownPeriodDays: 3,
