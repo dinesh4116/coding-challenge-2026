@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#111110" />
+  <meta name="description" content="Explainable Google Ads search-term triage. Review campaign signals, protect spend, and keep human judgment in control." />
+  <title>Signal / Search Term Triage</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+  <script defer src="./engine.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="#top" aria-label="Signal home"><span class="brand-mark">S</span><span>SIGNAL<small>SEARCH INTELLIGENCE</small></span></a>
+      <div class="side-label">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Main navigation">
+        <button class="nav-item active" data-tab="overview"><span>◈</span> Overview</button>
+        <button class="nav-item" data-tab="review"><span>◌</span> Review queue <b id="review-badge">—</b></button>
+        <button class="nav-item" data-tab="terms"><span>⌕</span> All search terms</button>
+        <button class="nav-item" data-tab="clusters"><span>⟷</span> Query clusters</button>
+        <button class="nav-item" data-tab="campaigns"><span>▥</span> Campaigns</button>
+        <button class="nav-item" data-tab="exports"><span>↗</span> Export center</button>
+      </nav>
+      <div class="side-bottom">
+        <div class="privacy-card"><span class="privacy-icon">◉</span><div><strong>Private by design</strong><p>Your CSV stays in this browser. No account data is sent to a server.</p></div></div>
+        <div class="side-foot"><span class="status-dot"></span> DECISION SUPPORT · HUMAN LED</div>
+      </div>
+    </aside>
+
+    <main class="main" id="top">
+      <header class="topbar"><div><span class="breadcrumb">WORKSPACE&nbsp; / &nbsp;SEARCH INTELLIGENCE</span><span class="top-date" id="today-label"></span></div><div class="top-actions"><span class="session-pill"><i></i> SESSION ONLY</span><label class="top-upload" for="csv-file">＋ Upload CSV</label><input id="csv-file" type="file" accept=".csv,text/csv" hidden /></div></header>
+
+      <div class="content">
+        <section class="hero" id="hero">
+          <div class="hero-copy"><div class="eyebrow"><i></i> SEARCH TERM TRIAGE · GOOGLE ADS</div><h1>Every query<br />has a <em>signal.</em></h1><p>Find the terms worth scaling, the spend worth stopping, and the thin evidence that deserves a human decision.</p><div class="hero-meta"><span>01 / EVIDENCE FIRST</span><span>BUILT FOR 25K+ ROWS</span><span>HUMAN IN THE LOOP</span></div></div>
+          <div class="signal-art" aria-label="Illustrative search signal graphic"><div class="art-top"><span>QUERY SIGNAL MAP</span><span class="live-label"><i></i> READY TO ANALYZE</span></div><div class="art-title"><span>ILLUSTRATIVE PATTERNS</span><strong>Intent, decoded.</strong></div><div class="art-chart" aria-hidden="true"><i style="--h:24%"></i><i style="--h:48%"></i><i style="--h:35%"></i><i style="--h:67%"></i><i style="--h:50%"></i><i style="--h:78%"></i><i style="--h:61%"></i><i style="--h:93%"></i><i style="--h:72%"></i><i style="--h:100%"></i><i style="--h:79%"></i><i style="--h:89%"></i><i style="--h:63%"></i><i style="--h:95%"></i><i style="--h:74%"></i><i style="--h:85%"></i></div><div class="art-legend"><span><i class="red-dot"></i> Strong intent</span><span><i class="stone-dot"></i> Needs context</span><span><i class="amber-dot"></i> Thin evidence</span></div><div class="art-stamp">SIGNAL<br /><b>OVER<br />NOISE</b></div><div class="art-foot">ILLUSTRATIVE SIGNALS · NOT ACCOUNT DATA</div></div>
+        </section>
+
+        <div id="notice" class="notice hidden" role="status"></div>
+        <section id="upload-panel" class="upload-panel">
+          <div class="upload-copy"><div class="section-tag">01 &nbsp; / &nbsp; BRING YOUR DATA</div><h2>Start with a search terms report.</h2><p>Drop in a Google Ads CSV. We’ll map the signals, explain every recommendation, and leave uncertain calls to your team.</p><div class="requirements"><span>SEARCH TERM</span><span>CLICKS</span><span>IMPRESSIONS</span><span>COST</span><span>CONVERSIONS</span></div><p class="small-note">Accepts standard Google Ads and snake_case column names. Optional: campaign, ad group, match type, conversion value.</p></div>
+          <label class="dropzone" id="dropzone" for="csv-file"><span class="upload-symbol">↑</span><strong>Drop your report here</strong><span>or browse files · .CSV</span><small>Processed locally in this browser</small></label>
+        </section>
+
+        <section id="dashboard" class="hidden">
+          <div class="dataset-bar"><div><div class="section-tag">02 &nbsp; / &nbsp; REPORT SNAPSHOT</div><h2 id="file-title">Search term report</h2><p id="file-subtitle" class="muted"></p></div><div class="dataset-actions"><button class="button ghost" id="change-file">Replace report</button><button class="button primary" data-jump="exports">Export decisions <span>↗</span></button></div></div>
+          <div class="metric-grid" id="metrics"></div>
+          <div class="insight-grid"><article class="panel spend-panel"><div class="panel-heading"><div><div class="section-tag">HISTORICAL DISTRIBUTION</div><h3>Spend by recommendation</h3></div><span class="info-mark" title="Shows reported historical spend only, not forecast savings.">i</span></div><p class="muted micro">Historical cost in the report · not a savings forecast</p><div id="spend-bars" class="horizontal-bars"></div></article><article class="panel mix-panel"><div class="panel-heading"><div><div class="section-tag">THE DECISION MIX</div><h3>Every row, accounted for</h3></div></div><div id="decision-mix" class="mix-list"></div><div class="panel-foot">One conversion alone can never trigger an automatic promote.</div></article></div>
+
+          <section class="policy-strip"><div><div class="section-tag">TUNE THE EVIDENCE BAR</div><p>Conservative defaults; adapt to account volume and attribution lag.</p></div><label>Promote clicks <input type="number" id="promote-clicks" min="1" max="500" value="20" /></label><label>Promote conversions <input type="number" id="promote-conversions" min="2" max="50" value="2" /></label><label>Block clicks <input type="number" id="block-clicks" min="1" max="500" value="25" /></label><label>Thin data below <input type="number" id="review-clicks" min="1" max="100" value="8" /></label></section>
+          <div id="review-warning" class="review-warning hidden"></div>
+          <section class="workspace-panel">
+            <div class="workspace-heading"><div><div class="section-tag">03 &nbsp; / &nbsp; ACTION WORKSPACE</div><h2>From signal to decision.</h2></div><div class="tab-list" role="tablist"><button class="tab active" data-tab="overview">Overview</button><button class="tab" data-tab="review">Review queue <span id="review-tab-count">0</span></button><button class="tab" data-tab="terms">All terms</button><button class="tab" data-tab="clusters">Clusters</button><button class="tab" data-tab="campaigns">Campaigns</button><button class="tab" data-tab="exports">Exports</button></div></div>
+            <section class="pane" data-pane="overview"><div class="overview-cards" id="overview-cards"></div><div class="overview-lower"><div class="overview-note"><span class="quote-mark">“</span><blockquote>A conversion is a clue,<br />never a verdict.</blockquote><span class="section-tag">THE TRIAGE PRINCIPLE · EVIDENCE FIRST</span></div><div class="overview-next"><div class="section-tag">NEXT BEST ACTION</div><h3 id="next-action-title">Review the highest-impact uncertain terms.</h3><p id="next-action-text" class="muted"></p><button class="text-button" data-jump="review">Open review queue <span>→</span></button></div></div></section>
+            <section class="pane hidden" data-pane="review"><div class="pane-toolbar"><div><h3>Human review queue</h3><p class="muted">Inspect the evidence, then keep or change the suggested action.</p></div><div class="filters"><input id="review-search" type="search" placeholder="Search terms" /><select id="review-confidence"><option value="All">All confidence</option><option>Low</option><option>Medium</option><option>High</option></select></div></div><div id="review-list" class="review-list"></div><div id="review-pagination" class="pagination"></div></section>
+            <section class="pane hidden" data-pane="terms"><div class="pane-toolbar"><div><h3>All search terms</h3><p class="muted">Filter the full report; each row carries a reason and confidence.</p></div><div class="filters"><input id="terms-search" type="search" placeholder="Search query" /><select id="terms-decision"><option value="All">All decisions</option><option>PROMOTE</option><option>BLOCK</option><option>REVIEW</option><option>IGNORE</option></select></div></div><div class="table-wrap"><table><thead><tr><th>SEARCH QUERY</th><th>DECISION</th><th>CLICKS</th><th>COST</th><th>CONV.</th><th>CONFIDENCE & REASON</th></tr></thead><tbody id="terms-body"></tbody></table></div><div id="terms-pagination" class="pagination"></div></section>
+            <section class="pane hidden" data-pane="clusters"><div class="pane-toolbar"><div><h3>Repeated query patterns</h3><p class="muted">Exact normalized matches only. Similar wording is not treated as a duplicate.</p></div><div class="cluster-summary" id="cluster-summary"></div></div><div id="cluster-list" class="cluster-list"></div><p class="small-note">A match can appear in different campaign or ad-group contexts. Check targeting scope before consolidating.</p></section>
+            <section class="pane hidden" data-pane="campaigns"><div class="pane-toolbar"><div><h3>Campaign action map</h3><p class="muted">See where reported spend sits by recommended action.</p></div></div><div id="campaign-list" class="campaign-list"></div></section>
+            <section class="pane hidden" data-pane="exports"><div class="pane-toolbar"><div><h3>Export center</h3><p class="muted">Downloads include your in-session corrections. Verify match type and scope before Google Ads import.</p></div></div><div class="export-grid"><article class="export-card"><span class="export-index">01</span><div><h3>Full audit report</h3><p>Every row, original fields, recommendation, confidence, reason, and human review.</p></div><button class="button primary" id="export-audit">Download CSV <span>↓</span></button></article><article class="export-card"><span class="export-index">02</span><div><h3>Promote candidates</h3><p>Exact-match keyword suggestions from terms marked PROMOTE.</p></div><button class="button ghost" id="export-promote">Download list <span>↓</span></button></article><article class="export-card"><span class="export-index">03</span><div><h3>Negative candidates</h3><p>Exact negative syntax; ad-group level when available, campaign otherwise.</p></div><button class="button ghost" id="export-block">Download list <span>↓</span></button></article></div><div class="export-caution">Review campaign targeting, match types, and attribution lag before importing. These are recommendations, not changes to your Google Ads account.</div></section>
+          </section>
+          <footer class="app-footer"><span>SIGNAL / SEARCH INTELLIGENCE</span><span>LOCAL PROCESSING · HUMAN REVIEW · EXPLAINABLE RULES</span></footer>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
